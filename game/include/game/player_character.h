@@ -5,19 +5,25 @@
 
 namespace game
 {
-class PhysicsManager;
 
 /**
  * \brief PlayerCharacter is a struct that holds information about the player character (when they can shoot again, their current input, and their current health).
  */
 struct PlayerCharacter
 {
+
     float shootingTime = 0.0f;
     PlayerInput input = 0u;
     PlayerNumber playerNumber = INVALID_PLAYER;
     short health = playerHealth;
     float invincibilityTime = 0.0f;
+    float acceleration = 0.0f;
+    float jumpBuffer = 0.0f;
+    bool isOnGround = false;
 };
+
+class PhysicsManager;
+
 class GameManager;
 
 /**

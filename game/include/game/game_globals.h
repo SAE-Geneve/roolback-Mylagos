@@ -45,6 +45,10 @@ constexpr float bulletPeriod = 3.0f;
 constexpr float playerInvincibilityPeriod = 1.5f;
 constexpr float invincibilityFlashPeriod = 0.5f;
 
+constexpr float gravity = -5.0f;
+constexpr float wallMaxHeight = 3.0f;
+constexpr float wallMinHeight = -3.0f;
+
 /**
  * \brief windowBufferSize is the size of input stored by a client. 5 seconds of frame at 50 fps
  */
@@ -95,6 +99,7 @@ enum class ComponentType : core::EntityMask
     ASTEROID = static_cast<core::EntityMask>(core::ComponentType::OTHER_TYPE) << 2u,
     PLAYER_INPUT = static_cast<core::EntityMask>(core::ComponentType::OTHER_TYPE) << 3u,
     DESTROYED = static_cast<core::EntityMask>(core::ComponentType::OTHER_TYPE) << 4u,
+    WALL = static_cast<core::EntityMask>(core::ComponentType::OTHER_TYPE) << 5u,
 };
 
 /**
@@ -104,14 +109,15 @@ using PlayerInput = std::uint8_t;
 
 namespace PlayerInputEnum
 {
-enum PlayerInput : std::uint8_t
-{
-    NONE = 0u,
-    UP = 1u << 0u,
-    DOWN = 1u << 1u,
-    LEFT = 1u << 2u,
-    RIGHT = 1u << 3u,
-    SHOOT = 1u << 4u,
+    enum PlayerInput : std::uint8_t
+    {
+        NONE = 0u,
+        UP = 1u << 0u,
+        DOWN = 1u << 1u,
+        LEFT = 1u << 2u,
+        RIGHT = 1u << 3u,
+        SHOOT = 1u << 4u,
+        BUILD = 1u << 5u,
 };
 }
 }

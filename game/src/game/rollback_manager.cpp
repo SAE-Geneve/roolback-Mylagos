@@ -1,3 +1,4 @@
+#include <iostream>
 #include <game/rollback_manager.h>
 #include <game/game_manager.h>
 #include "utils/assert.h"
@@ -136,6 +137,7 @@ void RollbackManager::StartNewFrame(Frame newFrame)
         }
     }
     currentFrame_ = newFrame;
+    //std::cout << "ooooo\n\n\n";
 }
 
 void RollbackManager::ValidateFrame(Frame newValidateFrame)
@@ -211,6 +213,7 @@ void RollbackManager::ValidateFrame(Frame newValidateFrame)
     lastValidatePhysicsManager_.CopyAllComponents(currentPhysicsManager_);
     lastValidateFrame_ = newValidateFrame;
     createdEntities_.clear();
+    //std::cout << "ooooo\n\n\n";
 }
 void RollbackManager::ConfirmFrame(Frame newValidateFrame, const std::array<PhysicsState, maxPlayerNmb>& serverPhysicsState)
 {
@@ -255,33 +258,60 @@ PhysicsState RollbackManager::GetValidatePhysicsState(PlayerNumber playerNumber)
         state += velocityPtr[i];
     }
     //Adding rotation
-    const auto angle = playerBody.rotation.value();
-    const auto* anglePtr = reinterpret_cast<const PhysicsState*>(&angle);
-    for (size_t i = 0; i < sizeof(float) / sizeof(PhysicsState); i++)
-    {
-        state += anglePtr[i];
-    }
-    //Adding angular Velocity
-    const auto angularVelocity = playerBody.angularVelocity.value();
-    const auto* angularVelPtr = reinterpret_cast<const PhysicsState*>(&angularVelocity);
-    for (size_t i = 0; i < sizeof(float) / sizeof(PhysicsState); i++)
-    {
-        state += angularVelPtr[i];
-    }
+    //const auto angle = playerBody.rotation.value();
+    //const auto* anglePtr = reinterpret_cast<const PhysicsState*>(&angle);
+    //for (size_t i = 0; i < sizeof(float) / sizeof(PhysicsState); i++)
+    //{
+    //    state += anglePtr[i];
+    //}
+    ////Adding angular Velocity
+    ////const auto angularVelocity = playerBody.angularVelocity.value();
+    ////const auto* angularVelPtr = reinterpret_cast<const PhysicsState*>(&angularVelocity);
+    ///*for (size_t i = 0; i < sizeof(float) / sizeof(PhysicsState); i++)
+    //{
+    //    state += angularVelPtr[i];
+    //}*/
     return state;
 }
 
-void RollbackManager::SpawnPlayer(PlayerNumber playerNumber, core::Entity entity, core::Vec2f position, core::Degree rotation)
+void RollbackManager::SpawnArena(core::Entity entity, core::Vec2f position)
+{
+    RigidBody body;
+    body.position = position;
+    Box box;
+    box.collisionType = CollisionType::STATIC;
+    box.layer = CollisionLayer::WALL;
+    box.extends = core::Vec2f(100.0f, 0.65f);
+    box.collideWithSame = true;
+
+    currentPhysicsManager_.AddBody(entity);
+    currentPhysicsManager_.SetBody(entity, body);
+    currentPhysicsManager_.AddBox(entity);
+    currentPhysicsManager_.SetBox(entity, box);
+
+    lastValidatePhysicsManager_.AddBody(entity);
+    lastValidatePhysicsManager_.SetBody(entity, body);
+    lastValidatePhysicsManager_.AddBox(entity);
+    lastValidatePhysicsManager_.SetBox(entity, box);
+
+    currentTransformManager_.AddComponent(entity);
+    currentTransformManager_.SetPosition(entity, position);
+    currentTransformManager_.SetScale(entity, core::Vec2f(100.0f, 0.65f));
+}
+
+
+void RollbackManager::SpawnPlayer(PlayerNumber playerNumber, core::Entity entity, core::Vec2f position)
 {
 
 #ifdef TRACY_ENABLE
     ZoneScoped;
 #endif
-    Body playerBody;
+    RigidBody playerBody;
     playerBody.position = position;
-    playerBody.rotation = rotation;
     Box playerBox;
     playerBox.extends = core::Vec2f::one() * 0.25f;
+    playerBox.layer = CollisionLayer::PLAYER;
+    playerBox.collideWithSame = true;
 
     PlayerCharacter playerCharacter;
     playerCharacter.playerNumber = playerNumber;
@@ -304,7 +334,7 @@ void RollbackManager::SpawnPlayer(PlayerNumber playerNumber, core::Entity entity
 
     currentTransformManager_.AddComponent(entity);
     currentTransformManager_.SetPosition(entity, position);
-    currentTransformManager_.SetRotation(entity, rotation);
+    currentTransformManager_.SetRotation(entity, core::Degree(45.0f));
 }
 
 PlayerInput RollbackManager::GetInputAtFrame(PlayerNumber playerNumber, Frame frame) const
@@ -313,6 +343,8 @@ PlayerInput RollbackManager::GetInputAtFrame(PlayerNumber playerNumber, Frame fr
         "Trying to get input too far in the past");
     return inputs_[playerNumber][currentFrame_ - frame];
 }
+
+
 
 void RollbackManager::OnTrigger(core::Entity entity1, core::Entity entity2)
 {
@@ -354,7 +386,7 @@ void RollbackManager::SpawnBullet(PlayerNumber playerNumber, core::Entity entity
 {
     createdEntities_.push_back({ entity, testedFrame_ });
 
-    Body bulletBody;
+    RigidBody bulletBody;
     bulletBody.position = position;
     bulletBody.velocity = velocity;
     Box bulletBox;

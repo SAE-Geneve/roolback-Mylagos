@@ -1,3 +1,4 @@
+#include <iostream>
 #include <game/player_character.h>
 #include <game/game_manager.h>
 
@@ -6,78 +7,107 @@
 #endif
 namespace game
 {
-PlayerCharacterManager::PlayerCharacterManager(core::EntityManager& entityManager, PhysicsManager& physicsManager, GameManager& gameManager) :
-    ComponentManager(entityManager),
-    physicsManager_(physicsManager),
-    gameManager_(gameManager)
+	PlayerCharacterManager::PlayerCharacterManager(core::EntityManager& entityManager, PhysicsManager& physicsManager, GameManager& gameManager) :
+		ComponentManager(entityManager),
+		physicsManager_(physicsManager),
+		gameManager_(gameManager)
 
-{
+	{
+		
+	}
 
-}
-
-void PlayerCharacterManager::FixedUpdate(sf::Time dt)
-{
+	void PlayerCharacterManager::FixedUpdate(sf::Time dt)
+	{
 
 #ifdef TRACY_ENABLE
-    ZoneScoped;
+		ZoneScoped;
 #endif
-    for (PlayerNumber playerNumber = 0; playerNumber < maxPlayerNmb; playerNumber++)
-    {
-        const auto playerEntity = gameManager_.GetEntityFromPlayerNumber(playerNumber);
-        if (!entityManager_.HasComponent(playerEntity,
-            static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)))
-            continue;
-        auto playerBody = physicsManager_.GetBody(playerEntity);
-        auto playerCharacter = GetComponent(playerEntity);
-        const auto input = playerCharacter.input;
+		for (PlayerNumber playerNumber = 0; playerNumber < maxPlayerNmb; playerNumber++)
+		{
+			const auto playerEntity = gameManager_.GetEntityFromPlayerNumber(playerNumber);
+			if (!entityManager_.HasComponent(playerEntity,
+				static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)))
+				continue;
+			auto playerBody = physicsManager_.GetBody(playerEntity);
+			auto playerBox = physicsManager_.GetBox(playerEntity);
+			auto playerCharacter = GetComponent(playerEntity);
+			const auto input = playerCharacter.input;
 
-        const bool right = input & PlayerInputEnum::PlayerInput::RIGHT;
-        const bool left = input & PlayerInputEnum::PlayerInput::LEFT;
-        const bool up = input & PlayerInputEnum::PlayerInput::UP;
-        const bool down = input & PlayerInputEnum::PlayerInput::DOWN;
-
-        const auto angularVelocity = ((left ? -1.0f : 0.0f) + (right ? 1.0f : 0.0f)) * playerAngularSpeed;
-
-        playerBody.angularVelocity = angularVelocity;
-
-        auto dir = core::Vec2f::up();
-        dir = dir.Rotate(-(playerBody.rotation + playerBody.angularVelocity * dt.asSeconds()));
-
-        const auto acceleration = ((down ? -1.0f : 0.0f) + (up ? 1.0f : 0.0f)) * dir;
+			const bool right = input & PlayerInputEnum::PlayerInput::RIGHT;
+			const bool left = input & PlayerInputEnum::PlayerInput::LEFT;
+			const bool up = input & PlayerInputEnum::PlayerInput::UP;
+			const bool down = input & PlayerInputEnum::PlayerInput::DOWN;
 
 
-        playerBody.velocity += acceleration * dt.asSeconds();
 
-        physicsManager_.SetBody(playerEntity, playerBody);
+			core::Vec2f accelerationX = ((left ? -1.0f : 0.0f) + (right ? 1.0f : 0.0f)) * core::Vec2f(20.0f, 0.0f);
 
-        if (playerCharacter.invincibilityTime > 0.0f)
-        {
-            playerCharacter.invincibilityTime -= dt.asSeconds();
-            SetComponent(playerEntity, playerCharacter);
-        }
-        //Check if playerCharacter cannot shoot, and increase shootingTime
-        if (playerCharacter.shootingTime < playerShootingPeriod)
-        {
-            playerCharacter.shootingTime += dt.asSeconds();
-            SetComponent(playerEntity, playerCharacter);
-        }
-        //Shooting mechanism
-        if (playerCharacter.shootingTime >= playerShootingPeriod)
-        {
-            if (input & PlayerInputEnum::PlayerInput::SHOOT)
-            {
-                const auto currentPlayerSpeed = playerBody.velocity.GetMagnitude();
-                const auto bulletVelocity = dir *
-                    ((core::Vec2f::Dot(playerBody.velocity, dir) > 0.0f ? currentPlayerSpeed : 0.0f)
-                        + bulletSpeed);
-                const auto bulletPosition = playerBody.position + dir * 0.5f + playerBody.velocity * dt.asSeconds();
-                gameManager_.SpawnBullet(playerCharacter.playerNumber,
-                    bulletPosition,
-                    bulletVelocity);
-                playerCharacter.shootingTime = 0.0f;
-                SetComponent(playerEntity, playerCharacter);
-            }
-        }
-    }
-}
+			if (left ^ right)
+			{
+				if (playerCharacter.acceleration < 1.5f)
+				{
+					playerCharacter.acceleration *= 2.0f;
+				}
+			}
+			else
+			{
+				if (std::abs(playerBody.velocity.x) < 0.01f)
+				{
+					playerBody.velocity.x = 0.0f;
+					playerCharacter.acceleration = 0.1f;
+				}
+				else
+				{
+					playerCharacter.acceleration /= 1.1f;
+				}
+			}
+
+			if (std::abs(playerBody.velocity.x) > playerCharacter.acceleration)
+			{
+				accelerationX = (playerBody.velocity.x > 0.0f ? -1.0f : +1.0f) * core::Vec2f(20.0f, 0.0f);
+			}
+
+
+			playerBody.velocity += (accelerationX)*dt.asSeconds();
+
+			if (playerBody.velocity.y > 1.0f)
+			{
+				playerBody.velocity.y += game::gravity * dt.asSeconds();
+			}
+			else {
+				playerBody.velocity.y += game::gravity * 2 * dt.asSeconds();
+			}
+
+			//core::LogDebug(fmt::format("Player's acceleration is x("  + std::to_string(playerBody.velocity.x) + ") : y(" + std::to_string(playerBody.velocity.y) + ")\n"));
+			//core::LogDebug(fmt::format("Player's position is x("  + std::to_string(playerBody.position.x) + ") : y(" + std::to_string(playerBody.position.y) + ")\n"));
+
+				playerBox.collisionType = CollisionType::DYNAMIC;
+			if (playerBody.position.y <= -3.0f)
+			{
+				playerBody.position.y = -3.0f;
+				playerBody.velocity.y = 0.0f;
+				playerCharacter.jumpBuffer = 0.0f;
+				//playerBox.collisionType = CollisionType::STATIC;
+			}
+			if (playerBox.hasCollided)
+			{
+				playerBody.velocity.y = 0;
+			}
+			if (up && playerCharacter.jumpBuffer < 2.0f)
+			{
+				playerBody.velocity.y += 30.0f * dt.asSeconds();
+				playerCharacter.jumpBuffer += 0.3f;
+			}
+			else
+			{
+				playerCharacter.jumpBuffer = 3;
+			}
+
+
+			physicsManager_.SetBox(playerEntity, playerBox);
+			physicsManager_.SetBody(playerEntity, playerBody);
+
+			SetComponent(playerEntity, playerCharacter);
+		}
+	}
 }

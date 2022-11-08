@@ -1,5 +1,6 @@
 #include "game/input_manager.h"
 #include "SFML/Window/Keyboard.hpp"
+#include "SFML/Window/Mouse.hpp"
 
 namespace game
 {
@@ -21,6 +22,9 @@ PlayerInput GetPlayerInput(int index)
                 PlayerInputEnum::PlayerInput::DOWN : PlayerInputEnum::PlayerInput::NONE);
         clientInput1 = clientInput1 | (sf::Keyboard::isKeyPressed(sf::Keyboard::RControl) ?
                 PlayerInputEnum::PlayerInput::SHOOT : PlayerInputEnum::PlayerInput::NONE);
+        clientInput1 = clientInput1 | (sf::Mouse::isButtonPressed(sf::Mouse::Left) ?
+            PlayerInputEnum::PlayerInput::BUILD : PlayerInputEnum::PlayerInput::NONE);
+
 
         return clientInput1;
     }
@@ -37,6 +41,9 @@ PlayerInput GetPlayerInput(int index)
                 PlayerInputEnum::PlayerInput::DOWN : PlayerInputEnum::PlayerInput::NONE);
         clientInput2 = clientInput2 | (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) ?
                 PlayerInputEnum::PlayerInput::SHOOT : PlayerInputEnum::PlayerInput::NONE);
+        clientInput2 = clientInput2 | (sf::Mouse::isButtonPressed(sf::Mouse::Right) ?
+            PlayerInputEnum::PlayerInput::BUILD : PlayerInputEnum::PlayerInput::NONE);
+
         return clientInput2;
     }
     default:

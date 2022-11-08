@@ -1,3 +1,4 @@
+#include <iostream>
 #include <engine/transform.h>
 
 namespace core

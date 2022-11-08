@@ -9,6 +9,7 @@
 #include <fmt/format.h>
 #include <imgui.h>
 #include <chrono>
+#include <iostream>
 
 
 #ifdef TRACY_ENABLE
@@ -23,9 +24,16 @@ GameManager::GameManager() :
     rollbackManager_(*this, entityManager_)
 {
     playerEntityMap_.fill(core::INVALID_ENTITY);
+
+    const auto entity = entityManager_.CreateEntity();
+    entityManager_.AddComponent(entity, static_cast<core::EntityMask>(core::ComponentType::BODY2D));
+    transformManager_.AddComponent(entity);
+    transformManager_.SetPosition(entity, core::Vec2f::one());
+    transformManager_.SetScale(entity, core::Vec2f(100.0f, 0.65f));
+    rollbackManager_.SpawnArena(entity, core::Vec2f(1.0f, -3.0F - 0.5f));
 }
 
-void GameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position, core::Degree rotation)
+void GameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position)
 {
     if (GetEntityFromPlayerNumber(playerNumber) != core::INVALID_ENTITY)
         return;
@@ -35,8 +43,8 @@ void GameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position, c
 
     transformManager_.AddComponent(entity);
     transformManager_.SetPosition(entity, position);
-    transformManager_.SetRotation(entity, rotation);
-    rollbackManager_.SpawnPlayer(playerNumber, entity, position, rotation);
+    
+    rollbackManager_.SpawnPlayer(playerNumber, entity, position);
 }
 
 core::Entity GameManager::GetEntityFromPlayerNumber(PlayerNumber playerNumber) const
@@ -178,7 +186,7 @@ void ClientGameManager::Update(sf::Time dt)
             {
                 transformManager_.SetPosition(entity, rollbackManager_.GetTransformManager().GetPosition(entity));
                 transformManager_.SetScale(entity, rollbackManager_.GetTransformManager().GetScale(entity));
-                transformManager_.SetRotation(entity, rollbackManager_.GetTransformManager().GetRotation(entity));
+                //transformManager_.SetRotation(entity, rollbackManager_.GetTransformManager().GetRotation(entity));
             }
         }
     }
@@ -316,11 +324,11 @@ void ClientGameManager::SetClientPlayer(PlayerNumber clientPlayer)
     clientPlayer_ = clientPlayer;
 }
 
-void ClientGameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position, core::Degree rotation)
+void ClientGameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position)
 {
     core::LogDebug(fmt::format("Spawn player: {}", playerNumber));
 
-    GameManager::SpawnPlayer(playerNumber, position, rotation);
+    GameManager::SpawnPlayer(playerNumber, position);
     const auto entity = GetEntityFromPlayerNumber(playerNumber);
     spriteManager_.AddComponent(entity);
     spriteManager_.SetTexture(entity, shipTexture_);
@@ -477,7 +485,11 @@ void ClientGameManager::UpdateCameraView()
     const sf::Vector2f extends{ cameraView_.getSize() / 2.0f / core::pixelPerMeter };
     float currentZoom = 1.0f;
     constexpr float margin = 1.0f;
-    for (PlayerNumber playerNumber = 0; playerNumber < maxPlayerNmb; playerNumber++)
+    //currentZoom = (cameraView_.getSize().x + cameraView_.getSize().y) / (originalView_.getSize().x + originalView_.getSize().y);
+
+    //std::cout << currentZoom;
+
+    /*for (PlayerNumber playerNumber = 0; playerNumber < maxPlayerNmb; playerNumber++)
     {
         const auto playerEntity = GetEntityFromPlayerNumber(playerNumber);
         if (playerEntity == core::INVALID_ENTITY)
@@ -504,7 +516,7 @@ void ClientGameManager::UpdateCameraView()
                 }
             }
         }
-    }
+    }*/
     cameraView_.zoom(currentZoom);
 
 }
