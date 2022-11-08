@@ -66,7 +66,7 @@ public:
     [[nodiscard]] Frame GetCurrentFrame() const { return currentFrame_; }
     [[nodiscard]] const core::TransformManager& GetTransformManager() const { return currentTransformManager_; }
     [[nodiscard]] const PlayerCharacterManager& GetPlayerCharacterManager() const { return currentPlayerManager_; }
-    void SpawnArena(core::Entity, core::Vec2f position);
+    void SpawnArena(core::Entity, int i);
     void SpawnPlayer(PlayerNumber playerNumber, core::Entity entity, core::Vec2f position);
     void SpawnBullet(PlayerNumber playerNumber, core::Entity entity, core::Vec2f position, core::Vec2f velocity);
     /**
@@ -95,12 +95,14 @@ private:
     PhysicsManager currentPhysicsManager_;
     PlayerCharacterManager currentPlayerManager_;
     BulletManager currentBulletManager_;
+    WallManager currentWallManager_;
     /**
      * Last Validate (confirm frame) Component Managers used for rollback
      */
     PhysicsManager lastValidatePhysicsManager_;
     PlayerCharacterManager lastValidatePlayerManager_;
     BulletManager lastValidateBulletManager_;
+    WallManager lastValidateWallManager_;
 
     /**
      * \brief lastValidateFrame_ is the last validated frame from the server side.

@@ -30,10 +30,17 @@ namespace game
 			}
 			if (entityManager_.HasComponent(entity, static_cast<core::EntityMask>(ComponentType::WALL)))
 			{
-				auto& wall = components_[entity];
+				const auto& wall = components_[entity];
 				auto wallEntity = physicsManager_.GetBody(entity);
-				wallEntity.velocity += core::Vec2f(0.0f, game::gravity * (static_cast<float>(wall.walltype) / 100.0f) * wallSpeedRatio(wallEntity.position.y));
 
+				if (wall.wallType == WallType::STATIC)
+				{
+					//core::LogDebug("Wall type is static");
+					continue;
+				}
+
+				wallEntity.velocity += core::Vec2f(0.0f, game::gravity /** (static_cast<float>(wall.wallType) / 100.0f) * wallSpeedRatio(wallEntity.position.y)*/);
+				physicsManager_.SetBody(entity, wallEntity);
 
 			}
 		}

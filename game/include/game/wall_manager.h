@@ -7,7 +7,7 @@ namespace game
 {
 	enum class WallType
 	{
-		None = 0,
+		STATIC = 0,
 		WallSimple = 100,
 		WallDouble = 125,
 		WallTriple = 150
@@ -20,7 +20,7 @@ namespace game
 	{
 		float remainingTime = 0.0f;
 		PlayerNumber playerNumber = INVALID_PLAYER;
-		WallType walltype;
+		WallType wallType = WallType::STATIC;
 
 		/**
 		 * \brief The lower the wall get the higher this func returns (0 to 1)

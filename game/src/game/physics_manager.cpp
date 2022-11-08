@@ -79,11 +79,8 @@ namespace game
 					}
 					else
 					{
-						if (box1.collisionType != CollisionType::STATIC)
-						{
-							Mtv(body1, box1, body2, box2);
-							box1.hasCollided = true;
-						}
+						Mtv(body1, box1, body2, box2);
+						box1.hasCollided = true;
 
 					}
 				}
@@ -94,6 +91,7 @@ namespace game
 
 	void PhysicsManager::Mtv(RigidBody& body, const Box& box, RigidBody& otherBody, const Box& otherBox) const
 	{
+
 		float mtvX = std::numeric_limits<float>::max();
 		float mtvY = std::numeric_limits<float>::max();
 		bool bod1ToBod2 = false;
@@ -104,41 +102,29 @@ namespace game
 		const auto bod2Max = core::Vec2f(otherBody.position.x + otherBox.extends.x, otherBody.position.y + otherBox.extends.y);
 		const auto bod2Min = core::Vec2f(otherBody.position.x - otherBox.extends.x, otherBody.position.y - otherBox.extends.y);
 
-		if (mtvX > std::abs(bod1Max.x - bod2Min.x))
-		{
-			mtvX = bod1Max.x - bod2Min.x;
-		}
-		if (mtvX > std::abs(bod2Max.x - bod1Min.x))
-		{
-			mtvX = bod2Max.x - bod1Min.x;
-			bod1ToBod2 = true;
-		}
 
-		if (mtvY > std::abs(bod1Max.y - bod2Min.y))
+		if (box.collisionType == CollisionType::DYNAMIC && otherBox.collisionType == CollisionType::DYNAMIC)
 		{
-			mtvY = bod1Max.y - bod2Min.y;
-		}
-		if (mtvY > std::abs(bod2Max.y - bod1Min.y))
-		{
-			mtvY = bod2Max.y - bod1Min.y;
-			bod1ToBod2 = true;
-		}
-
-		core::LogDebug(fmt::format("MTV values are x("  + std::to_string(mtvX) + ") : y(" + std::to_string(mtvY) + ")\n"));
-
-		if (box.collisionType == CollisionType::DYNAMIC && otherBox.collisionType == CollisionType::STATIC)
-		{
-			if (std::abs(mtvX) < std::abs(mtvY))
+			if (mtvX > std::abs(bod1Max.x - bod2Min.x))
 			{
-				body.position.x += mtvX;
+				mtvX = bod1Max.x - bod2Min.x;
 			}
-			else
+			if (mtvX > std::abs(bod2Max.x - bod1Min.x))
 			{
-				body.position.y += mtvY;
+				mtvX = bod2Max.x - bod1Min.x;
+				bod1ToBod2 = true;
 			}
-		}
-		else
-		{
+
+			if (mtvY > std::abs(bod1Max.y - bod2Min.y))
+			{
+				mtvY = bod1Max.y - bod2Min.y;
+			}
+			if (mtvY > std::abs(bod2Max.y - bod1Min.y))
+			{
+				mtvY = bod2Max.y - bod1Min.y;
+				bod1ToBod2 = true;
+			}
+
 			if (std::abs(mtvX) < std::abs(mtvY))
 			{
 				if (bod1ToBod2)
@@ -165,6 +151,51 @@ namespace game
 					otherBody.position.y += mtvY / 2;
 				}
 			}
+		}
+		else
+		{
+			if (mtvX > bod1Max.x - bod2Min.x)
+			{
+				mtvX = bod1Max.x - bod2Min.x;
+			}
+			if (mtvX > bod2Max.x - bod1Min.x)
+			{
+				mtvX = bod1Min.x - bod2Max.x;
+			}
+
+			if (mtvY > std::abs(bod1Max.y - bod2Min.y))
+			{
+				mtvY = bod1Max.y - bod2Min.y;
+			}
+			if (mtvY > std::abs(bod2Max.y - bod1Min.y))
+			{
+				mtvY = bod1Min.y - bod2Max.y;
+			}
+
+			if (box.collisionType == CollisionType::DYNAMIC && otherBox.collisionType == CollisionType::STATIC)
+			{
+				if (std::abs(mtvX) < std::abs(mtvY))
+				{
+					body.position.x += mtvX;
+				}
+				else
+				{
+
+					body.position.y += mtvY;
+				}
+			}
+			else if (otherBox.collisionType == CollisionType::DYNAMIC && box.collisionType == CollisionType::STATIC)
+			{
+				if (std::abs(mtvX) < std::abs(mtvY))
+				{
+					otherBody.position.x += mtvX;
+				}
+				else
+				{
+					otherBody.position.y += mtvY;
+				}
+			}
+
 		}
 	}
 

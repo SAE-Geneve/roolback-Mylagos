@@ -95,6 +95,7 @@ namespace game
 			}
 			if (up && playerCharacter.jumpBuffer < 2.0f)
 			{
+				playerBox.hasCollided = false;
 				playerBody.velocity.y += 30.0f * dt.asSeconds();
 				playerCharacter.jumpBuffer += 0.3f;
 			}

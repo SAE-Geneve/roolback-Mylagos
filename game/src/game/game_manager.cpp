@@ -25,12 +25,16 @@ GameManager::GameManager() :
 {
     playerEntityMap_.fill(core::INVALID_ENTITY);
 
-    const auto entity = entityManager_.CreateEntity();
-    entityManager_.AddComponent(entity, static_cast<core::EntityMask>(core::ComponentType::BODY2D));
-    transformManager_.AddComponent(entity);
-    transformManager_.SetPosition(entity, core::Vec2f::one());
-    transformManager_.SetScale(entity, core::Vec2f(100.0f, 0.65f));
-    rollbackManager_.SpawnArena(entity, core::Vec2f(1.0f, -3.0F - 0.5f));
+    // 1 for floor 2/3 for walls, 4 for mtv test
+    for (int i = 0; i<3; i++)
+    {
+	    const auto entity = entityManager_.CreateEntity();
+    	transformManager_.AddComponent(entity);
+    	transformManager_.SetPosition(entity, core::Vec2f::one());
+    	transformManager_.SetScale(entity, core::Vec2f(1.0f, 1.0f));
+    
+    	rollbackManager_.SpawnArena(entity, i);
+    }
 }
 
 void GameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position)

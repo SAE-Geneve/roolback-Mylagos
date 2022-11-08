@@ -15,7 +15,7 @@ public:
     void Init();
     void Draw(sf::RenderTarget& renderTarget) override;
 private:
-    static constexpr std::size_t starCount = 1024;
+    static constexpr std::size_t starCount = 4096;
     sf::VertexArray vertexArray_;
 };
 
