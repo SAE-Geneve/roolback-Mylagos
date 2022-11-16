@@ -26,7 +26,7 @@ GameManager::GameManager() :
     playerEntityMap_.fill(core::INVALID_ENTITY);
 
     // 1 for floor 2/3 for walls, 4 for mtv test
-    for (int i = 0; i<3; i++)
+    for (int i = 0; i<7; i++)
     {
 	    const auto entity = entityManager_.CreateEntity();
     	transformManager_.AddComponent(entity);

@@ -38,83 +38,88 @@ namespace game
 			const bool up = input & PlayerInputEnum::PlayerInput::UP;
 			const bool down = input & PlayerInputEnum::PlayerInput::DOWN;
 
-			playerBox.collideWithSame = false;
-
-			//core::Vec2f accelerationX = ((left ? -1.0f : 0.0f) + (right ? 1.0f : 0.0f)) * core::Vec2f(20.0f, 0.0f);
-			playerBody.velocity.x += ((left ? -1.0f : 0.0f) + (right ? 1.0f : 0.0f)) * 20.0f * dt.asSeconds();
-
-			if (left ^ right)
-			{
-				if (playerCharacter.acceleration < 1.5f)
-				{
-					playerCharacter.acceleration *= 2.0f;
-				}
-			}
-			else
-			{
-				if (std::abs(playerBody.velocity.x) < 0.01f)
-				{
-					playerBody.velocity.x = 0.0f;
-					playerCharacter.acceleration = 0.1f;
-				}
-				else
-				{
-					playerBody.velocity.x /= 1.1f;
-					playerCharacter.acceleration /= 1.1f;
-				}
-			}
-
-			if (std::abs(playerBody.velocity.x) > playerCharacter.acceleration)
-			{
-				playerBody.velocity.x += (playerBody.velocity.x > 0.0f ? -1.0f : +1.0f) * 20.0f * dt.asSeconds();
-			}
-
-
-			//playerBody.velocity += (accelerationX)*dt.asSeconds();
-
-			if (playerBody.velocity.y > 1.0f)
-			{
-				playerBody.velocity.y += game::gravity * dt.asSeconds();
-			}
-			else {
-				playerBody.velocity.y += game::gravity * 2 * dt.asSeconds();
-			}
-
-			//core::LogDebug(fmt::format("Player's acceleration is x("  + std::to_string(playerBody.velocity.x) + ") : y(" + std::to_string(playerBody.velocity.y) + ")\n"));
-			//core::LogDebug(fmt::format("Player's position is x("  + std::to_string(playerBody.position.x) + ") : y(" + std::to_string(playerBody.position.y) + ")\n"));
-
+			playerBox.collideWithSame = true;
 			playerBox.collisionType = CollisionType::DYNAMIC;
-			if (playerBody.position.y <= -3.0f)
+
+			//if (playerBody.position.y <= -3.0f)
+			//{
+			//	playerBody.position.y = -3.0f;
+			//	playerBody.velocity.y = 0.0f;
+			//	playerCharacter.jumpBuffer = 0.0f;
+			//	//playerBox.collisionType = CollisionType::STATIC;
+			//}
+			//if (playerBox.hasCollided)
+			//{
+			//	playerBody.velocity.y = 0;
+			//}
+			//if (up && playerCharacter.jumpBuffer < 2.0f)
+			//{
+			//	playerBox.hasCollided = false;
+			//	playerBody.velocity.y += 30.0f * dt.asSeconds();
+			//	playerCharacter.jumpBuffer += 0.3f;
+			//}
+			//else
+			//{
+			//	playerCharacter.jumpBuffer = 3;
+			//}
+			//if (playerBody.velocity.y > 1.0f)
+			//{
+			//	playerBody.velocity.y += game::gravity * dt.asSeconds();
+			//}
+			//else {
+			//	playerBody.velocity.y += game::gravity * 2 * dt.asSeconds();
+			//}
+			
+			
+			//int x = playerCharacter.isOnGround;
+			//core::LogDebug(std::to_string(x));
+			if (up && playerCharacter.jumpBuffer < 2.0f && playerCharacter.isOnGround)
 			{
-				playerBody.position.y = -3.0f;
-				playerBody.velocity.y = 0.0f;
-				playerCharacter.jumpBuffer = 0.0f;
-				//playerBox.collisionType = CollisionType::STATIC;
-			}
-			if (playerBox.hasCollided)
-			{
-				playerBody.velocity.y = 0;
-			}
-			if (up && playerCharacter.jumpBuffer < 2.0f)
-			{
-				playerBox.hasCollided = false;
 				playerBody.velocity.y += 30.0f * dt.asSeconds();
 				playerCharacter.jumpBuffer += 0.3f;
 			}
-			else
+			else if (!up || playerCharacter.jumpBuffer > 2.0f)
 			{
-				playerCharacter.jumpBuffer = 3;
+				playerCharacter.isOnGround = false;
+				playerCharacter.jumpCooldownCount = 0;
+				playerCharacter.jumpBuffer = 0;
+			}
+			if (playerBody.velocity.y < 0.01f && playerBody.velocity.y > -0.01f)
+			{
+				playerCharacter.jumpCooldownCount += 1;
+				if (playerCharacter.jumpCooldownCount > 2)
+				{
+					playerCharacter.isOnGround = true;
+				}
+			}
+			if(!playerCharacter.isOnGround)
+			{
+				if (playerBody.velocity.y > 1.0f)
+				{
+					playerBody.velocity.y += game::gravity * dt.asSeconds();
+				}
+				else {
+					playerBody.velocity.y += game::gravity * 2 * dt.asSeconds();
+				}
 			}
 
-			if ((playerCharacter.otherPlayerIsOnLeft || playerCharacter.otherPlayerIsOnRight) && playerCharacter.collisionAccelerationOverTime <= 3.0f)
-			{
-				playerCharacter.collisionAccelerationOverTime += dt.asSeconds();
-			}
 
-			if (playerCharacter.otherPlayerIsOnRight)
-			{
-				playerBody.velocity.x -= 10.0f * playerCharacter.collisionAccelerationOverTime * dt.asSeconds();
-			}
+
+
+
+			left&& playerBody.velocity.x > 0 ? playerBody.velocity.x = 0 : 0.0f;
+			right&& playerBody.velocity.x < 0 ? playerBody.velocity.x = 0 : 0.0f;
+
+
+			playerCharacter.summForceX += ((left ? -1.0f : 0.0f) + (right ? 1.0f : 0.0f)) * 20.0f;
+
+			//Multiply by drag
+			playerBody.velocity.x *= 0.85f;
+
+			playerBody.velocity.x += playerCharacter.summForceX * dt.asSeconds();
+			//core::LogDebug(fmt::format("Player's acceleration is x("  + std::to_string(playerBody.velocity.x) + ") : y(" + std::to_string(playerBody.velocity.y) + ")\n"));
+
+			playerCharacter.summForceX = 0.0f;
 
 			physicsManager_.SetBox(playerEntity, playerBox);
 			physicsManager_.SetBody(playerEntity, playerBody);

@@ -76,11 +76,11 @@ namespace game
 					// If layer is same and box does not want to collide with same, don't resolve collisions
 					if ((box1.layer == box2.layer) && (!box1.collideWithSame || !box2.collideWithSame))
 					{
-						
+
 					}
 					else
 					{
-						Mtv(body1, box1, body2, box2, dt);
+						CollisionResponse(body1, box1, body2, box2, dt);
 						box1.hasCollided = true;
 
 					}
@@ -90,9 +90,9 @@ namespace game
 		}
 	}
 
-	void PhysicsManager::Mtv(RigidBody& body, const Box& box, RigidBody& otherBody, const Box& otherBox, const sf::Time dt) const
+	void game::PhysicsManager::CollisionResponse(RigidBody& body, const Box& box, RigidBody& otherBody,
+		const Box& otherBox, const sf::Time dt) const
 	{
-
 		const auto bod1Max = core::Vec2f(body.position.x + box.extends.x, body.position.y + box.extends.y);
 		const auto bod1Min = core::Vec2f(body.position.x - box.extends.x, body.position.y - box.extends.y);
 
@@ -104,40 +104,50 @@ namespace game
 
 
 		float mtvX = bod1Max.x - bod2Min.x;
+		auto sign = mtvX > 0 ? 1.0f : -1.0f;
 		mtvX = mtvX > bod2Max.x - bod1Min.x ? bod1Min.x - bod2Max.x : mtvX;
 
 		float mtvY = bod1Max.y - bod2Min.y;
 		mtvY = mtvY > bod2Max.y - bod1Min.y ? bod1Min.y - bod2Max.y : mtvY;
 
+
+
 		if (box1IsDynamic && box2IsDynamic)
 		{
-			mtvX /= 2.0f;
-			mtvY /= 2.0f;
+			body.velocity.x += -mtvX * 0.25f;
+			otherBody.velocity.x += mtvX * 0.25f;
 		}
-
-		if (std::abs(mtvX) < std::abs(mtvY))
+		else if (std::abs(mtvX) < std::abs(mtvY))
 		{
-			if (box1IsDynamic)
+			if (box1IsDynamic && !box2IsDynamic)
 			{
 				body.position.x -= mtvX;
 			}
-			if (box2IsDynamic)
+			if (box2IsDynamic && !box1IsDynamic)
 			{
 				otherBody.position.x += mtvX;
 			}
 		}
 		else
 		{
-			if (box1IsDynamic)
+			if (box1IsDynamic && !box2IsDynamic)
 			{
 				body.position.y -= mtvY;
+				if(body.velocity.y < 0.0f)
+				{
+					body.velocity.y = 0.0f;
+				}
+
 			}
-			if (box2IsDynamic)
+			if (box2IsDynamic && !box1IsDynamic)
 			{
 				otherBody.position.y += mtvY;
+				if (otherBody.velocity.y < 0.0f)
+				{
+					otherBody.velocity.y = 0.0f;
+				}
 			}
 		}
-
 	}
 
 

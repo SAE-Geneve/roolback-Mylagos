@@ -19,7 +19,11 @@ struct PlayerCharacter
     float invincibilityTime = 0.0f;
     float acceleration = 0.0f;
     float jumpBuffer = 0.0f;
+    int jumpCooldownCount = 0;
     bool isOnGround = false;
+
+    float summForceX = 0.0f;
+    float summForceY = 0.0f;
 
     bool otherPlayerIsOnLeft = false;
     bool otherPlayerIsOnRight = false;

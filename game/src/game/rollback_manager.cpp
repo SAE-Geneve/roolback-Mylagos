@@ -275,21 +275,39 @@ namespace game
 		if (i == 0)
 		{
 			body.position = core::Vec2f(1.0f, -3.0f - 0.5f);
-			box.extends = core::Vec2f(100.0f, 0.24f);
+			box.extends = core::Vec2f(100.0f, 0.25f);
+			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
+
+		}
+		else if (i == 6)
+		{
+			body.position = core::Vec2f(1.0f, 3.5f);
+			box.extends = core::Vec2f(100.0f, 0.25f);
 			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
 
 		}
 		else if (i == 3)
 		{
-			body.position = core::Vec2f(1.0f, -2.5f);
-			box.extends = core::Vec2f(100.0f, 0.24f);
+			body.position = core::Vec2f(1.0f, -3.0f);
+			box.extends = core::Vec2f(0.25f, 0.25f);
 			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
-
+		}
+		else if (i == 4)
+		{
+			body.position = core::Vec2f(-1.0f, 0.5f);
+			box.extends = core::Vec2f(0.25f, 0.25f);
+			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
+		}
+		else if (i == 5)
+		{
+			body.position = core::Vec2f(1.0f, 1.5f);
+			box.extends = core::Vec2f(0.25f, 0.25f);
+			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
 		}
 		else
 		{
 			body.position = core::Vec2f((3.0f) * (1.0f - 2.0f * static_cast<float>(i % 2)), 1.0f);
-			box.extends = core::Vec2f(0.24f, 100.0f);
+			box.extends = core::Vec2f(0.25f, 100.0f);
 			pos = core::Vec2f((3.0f) * (1.0f - 2.0f * static_cast<float>(i % 2)), 1.0f);
 		}
 
@@ -400,40 +418,6 @@ namespace game
 			const auto& player = currentPlayerManager_.GetComponent(entity2);
 			const auto& bullet = currentBulletManager_.GetComponent(entity1);
 			ManageCollision(player, entity2, bullet, entity1);
-		}
-
-		const std::function<void(const PlayerCharacter&, core::Entity, const PlayerCharacter&, core::Entity)> PlayerPlayerCollision =
-			[this](const auto& player, auto playerEntity, const auto& player2, auto player2Entity)
-		{
-			//lower health point
-			const auto& playerCharacter = currentPlayerManager_.GetComponent(playerEntity);
-			auto player2Character = currentPlayerManager_.GetComponent(player2Entity);
-			auto playerBody = currentPhysicsManager_.GetBody(playerEntity);
-			auto player2Body = currentPhysicsManager_.GetBody(player2Entity);
-			if (playerBody.position.x - player2Body.position.x < 0.0f)
-			{
-				//core::LogDebug(fmt::format("Player {} is hit by bullet", playerCharacter.playerNumber));
-				
-			}
-			currentPlayerManager_.SetComponent(playerEntity, playerCharacter);
-		};
-
-		if (entityManager_.HasComponent(entity1, static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)) &&
-			entityManager_.HasComponent(entity2, static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)))
-		{
-			const auto& player = currentPlayerManager_.GetComponent(entity1);
-			const auto& player2 = currentPlayerManager_.GetComponent(entity2);
-			PlayerPlayerCollision(player, entity1, player2, entity2);
-			auto playerBody = currentPhysicsManager_.GetBody(entity1);
-			auto player2Body = currentPhysicsManager_.GetBody(entity2);
-
-			auto vector = playerBody.position - player2Body.position;
-			playerBody.velocity += vector;
-			player2Body.velocity -= vector;
-			currentPhysicsManager_.SetBody(entity1, playerBody);
-			currentPhysicsManager_.SetBody(entity2, player2Body);
-
-
 		}
 	}
 

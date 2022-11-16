@@ -36,7 +36,6 @@ namespace game
 	struct RigidBody
 	{
 		core::Vec2f position = core::Vec2f::zero();
-		core::Vec2f summForces = core::Vec2f::zero();
 		core::Vec2f velocity = core::Vec2f::zero();
 		core::Degree rotation = core::Degree(0.0f);
 
@@ -93,7 +92,7 @@ namespace game
 	public:
 		explicit PhysicsManager(core::EntityManager& entityManager);
 		void FixedUpdate(sf::Time dt);
-		void Mtv(RigidBody& body, const Box& box, RigidBody& otherBody, const Box& otherBox, const sf::Time dt) const;
+		void CollisionResponse(RigidBody& body, const Box& box, RigidBody& otherBody, const Box& otherBox, const sf::Time dt) const;
 		[[nodiscard]] const RigidBody& GetBody(core::Entity entity) const;
 		void SetBody(core::Entity entity, const RigidBody& body);
 		void AddBody(core::Entity entity);
