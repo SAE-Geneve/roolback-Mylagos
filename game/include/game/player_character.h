@@ -20,6 +20,10 @@ struct PlayerCharacter
     float acceleration = 0.0f;
     float jumpBuffer = 0.0f;
     bool isOnGround = false;
+
+    bool otherPlayerIsOnLeft = false;
+    bool otherPlayerIsOnRight = false;
+    float collisionAccelerationOverTime = 0.0f;
 };
 
 class PhysicsManager;

@@ -13,7 +13,7 @@ namespace game
 		gameManager_(gameManager)
 
 	{
-		
+
 	}
 
 	void PlayerCharacterManager::FixedUpdate(sf::Time dt)
@@ -38,9 +38,10 @@ namespace game
 			const bool up = input & PlayerInputEnum::PlayerInput::UP;
 			const bool down = input & PlayerInputEnum::PlayerInput::DOWN;
 
+			playerBox.collideWithSame = false;
 
-
-			core::Vec2f accelerationX = ((left ? -1.0f : 0.0f) + (right ? 1.0f : 0.0f)) * core::Vec2f(20.0f, 0.0f);
+			//core::Vec2f accelerationX = ((left ? -1.0f : 0.0f) + (right ? 1.0f : 0.0f)) * core::Vec2f(20.0f, 0.0f);
+			playerBody.velocity.x += ((left ? -1.0f : 0.0f) + (right ? 1.0f : 0.0f)) * 20.0f * dt.asSeconds();
 
 			if (left ^ right)
 			{
@@ -58,17 +59,18 @@ namespace game
 				}
 				else
 				{
+					playerBody.velocity.x /= 1.1f;
 					playerCharacter.acceleration /= 1.1f;
 				}
 			}
 
 			if (std::abs(playerBody.velocity.x) > playerCharacter.acceleration)
 			{
-				accelerationX = (playerBody.velocity.x > 0.0f ? -1.0f : +1.0f) * core::Vec2f(20.0f, 0.0f);
+				playerBody.velocity.x += (playerBody.velocity.x > 0.0f ? -1.0f : +1.0f) * 20.0f * dt.asSeconds();
 			}
 
 
-			playerBody.velocity += (accelerationX)*dt.asSeconds();
+			//playerBody.velocity += (accelerationX)*dt.asSeconds();
 
 			if (playerBody.velocity.y > 1.0f)
 			{
@@ -81,7 +83,7 @@ namespace game
 			//core::LogDebug(fmt::format("Player's acceleration is x("  + std::to_string(playerBody.velocity.x) + ") : y(" + std::to_string(playerBody.velocity.y) + ")\n"));
 			//core::LogDebug(fmt::format("Player's position is x("  + std::to_string(playerBody.position.x) + ") : y(" + std::to_string(playerBody.position.y) + ")\n"));
 
-				playerBox.collisionType = CollisionType::DYNAMIC;
+			playerBox.collisionType = CollisionType::DYNAMIC;
 			if (playerBody.position.y <= -3.0f)
 			{
 				playerBody.position.y = -3.0f;
@@ -104,6 +106,15 @@ namespace game
 				playerCharacter.jumpBuffer = 3;
 			}
 
+			if ((playerCharacter.otherPlayerIsOnLeft || playerCharacter.otherPlayerIsOnRight) && playerCharacter.collisionAccelerationOverTime <= 3.0f)
+			{
+				playerCharacter.collisionAccelerationOverTime += dt.asSeconds();
+			}
+
+			if (playerCharacter.otherPlayerIsOnRight)
+			{
+				playerBody.velocity.x -= 10.0f * playerCharacter.collisionAccelerationOverTime * dt.asSeconds();
+			}
 
 			physicsManager_.SetBox(playerEntity, playerBox);
 			physicsManager_.SetBody(playerEntity, playerBody);

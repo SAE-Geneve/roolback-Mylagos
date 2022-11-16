@@ -268,55 +268,55 @@ namespace game
 	void RollbackManager::SpawnArena(core::Entity entity, int i)
 	{
 
-			RigidBody body;
-			Box box;
-			Wall wall;
-			auto pos = core::Vec2f::one();
-			if (i == 0)
-			{
-				body.position = core::Vec2f(1.0f, -3.0f - 0.5f);
-				box.extends = core::Vec2f(100.0f, 0.24f);
-				pos = core::Vec2f(1.0f, -3.0f - 0.5f);
+		RigidBody body;
+		Box box;
+		Wall wall;
+		auto pos = core::Vec2f::one();
+		if (i == 0)
+		{
+			body.position = core::Vec2f(1.0f, -3.0f - 0.5f);
+			box.extends = core::Vec2f(100.0f, 0.24f);
+			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
 
-			}
-			else if (i == 3)
-			{
-				body.position = core::Vec2f(1.0f,  - 2.5f);
-				box.extends = core::Vec2f(100.0f, 0.24f);
-				pos = core::Vec2f(1.0f, -3.0f - 0.5f);
+		}
+		else if (i == 3)
+		{
+			body.position = core::Vec2f(1.0f, -2.5f);
+			box.extends = core::Vec2f(100.0f, 0.24f);
+			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
 
-			}
-			else
-			{
-				body.position = core::Vec2f((3.0f) * (1.0f - 2.0f * static_cast<float>(i % 2)), 1.0f);
-				box.extends = core::Vec2f(0.24f, 100.0f);
-				pos = core::Vec2f(( 3.0f) * (1.0f - 2.0f * static_cast<float>(i % 2)), 1.0f);
-			}
+		}
+		else
+		{
+			body.position = core::Vec2f((3.0f) * (1.0f - 2.0f * static_cast<float>(i % 2)), 1.0f);
+			box.extends = core::Vec2f(0.24f, 100.0f);
+			pos = core::Vec2f((3.0f) * (1.0f - 2.0f * static_cast<float>(i % 2)), 1.0f);
+		}
 
-			wall.wallType = WallType::WallDouble;
-			wall.remainingTime = 500.0f;
-			box.collisionType = CollisionType::STATIC;
-			box.layer = CollisionLayer::WALL;
-			box.collideWithSame = false;
+		wall.wallType = WallType::WallDouble;
+		wall.remainingTime = 500.0f;
+		box.collisionType = CollisionType::STATIC;
+		box.layer = CollisionLayer::WALL;
+		box.collideWithSame = false;
 
-			wall.wallType = WallType::WallDouble;
-			wall.remainingTime = 500.0f;
-			currentWallManager_.AddComponent(entity);
-			currentWallManager_.SetComponent(entity, wall);
+		wall.wallType = WallType::WallDouble;
+		wall.remainingTime = 500.0f;
+		currentWallManager_.AddComponent(entity);
+		currentWallManager_.SetComponent(entity, wall);
 
-			currentPhysicsManager_.AddBody(entity);
-			currentPhysicsManager_.SetBody(entity, body);
-			currentPhysicsManager_.AddBox(entity);
-			currentPhysicsManager_.SetBox(entity, box);
+		currentPhysicsManager_.AddBody(entity);
+		currentPhysicsManager_.SetBody(entity, body);
+		currentPhysicsManager_.AddBox(entity);
+		currentPhysicsManager_.SetBox(entity, box);
 
-			lastValidatePhysicsManager_.AddBody(entity);
-			lastValidatePhysicsManager_.SetBody(entity, body);
-			lastValidatePhysicsManager_.AddBox(entity);
-			lastValidatePhysicsManager_.SetBox(entity, box);
+		lastValidatePhysicsManager_.AddBody(entity);
+		lastValidatePhysicsManager_.SetBody(entity, body);
+		lastValidatePhysicsManager_.AddBox(entity);
+		lastValidatePhysicsManager_.SetBox(entity, box);
 
-			currentTransformManager_.AddComponent(entity);
-			currentTransformManager_.SetPosition(entity, pos);
-			currentTransformManager_.SetScale(entity, core::Vec2f::one());
+		currentTransformManager_.AddComponent(entity);
+		currentTransformManager_.SetPosition(entity, pos);
+		currentTransformManager_.SetScale(entity, core::Vec2f::one());
 	}
 
 
@@ -368,6 +368,7 @@ namespace game
 
 	void RollbackManager::OnTrigger(core::Entity entity1, core::Entity entity2)
 	{
+
 		const std::function<void(const PlayerCharacter&, core::Entity, const Bullet&, core::Entity)> ManageCollision =
 			[this](const auto& player, auto playerEntity, const auto& bullet, auto bulletEntity)
 		{
@@ -399,6 +400,40 @@ namespace game
 			const auto& player = currentPlayerManager_.GetComponent(entity2);
 			const auto& bullet = currentBulletManager_.GetComponent(entity1);
 			ManageCollision(player, entity2, bullet, entity1);
+		}
+
+		const std::function<void(const PlayerCharacter&, core::Entity, const PlayerCharacter&, core::Entity)> PlayerPlayerCollision =
+			[this](const auto& player, auto playerEntity, const auto& player2, auto player2Entity)
+		{
+			//lower health point
+			const auto& playerCharacter = currentPlayerManager_.GetComponent(playerEntity);
+			auto player2Character = currentPlayerManager_.GetComponent(player2Entity);
+			auto playerBody = currentPhysicsManager_.GetBody(playerEntity);
+			auto player2Body = currentPhysicsManager_.GetBody(player2Entity);
+			if (playerBody.position.x - player2Body.position.x < 0.0f)
+			{
+				//core::LogDebug(fmt::format("Player {} is hit by bullet", playerCharacter.playerNumber));
+				
+			}
+			currentPlayerManager_.SetComponent(playerEntity, playerCharacter);
+		};
+
+		if (entityManager_.HasComponent(entity1, static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)) &&
+			entityManager_.HasComponent(entity2, static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)))
+		{
+			const auto& player = currentPlayerManager_.GetComponent(entity1);
+			const auto& player2 = currentPlayerManager_.GetComponent(entity2);
+			PlayerPlayerCollision(player, entity1, player2, entity2);
+			auto playerBody = currentPhysicsManager_.GetBody(entity1);
+			auto player2Body = currentPhysicsManager_.GetBody(entity2);
+
+			auto vector = playerBody.position - player2Body.position;
+			playerBody.velocity += vector;
+			player2Body.velocity -= vector;
+			currentPhysicsManager_.SetBody(entity1, playerBody);
+			currentPhysicsManager_.SetBody(entity2, player2Body);
+
+
 		}
 	}
 
@@ -442,5 +477,5 @@ namespace game
 			return;
 		}
 			entityManager_.AddComponent(entity, static_cast<core::EntityMask>(ComponentType::DESTROYED));
-	}
+}
 }

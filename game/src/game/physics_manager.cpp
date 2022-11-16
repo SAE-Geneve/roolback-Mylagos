@@ -76,10 +76,11 @@ namespace game
 					// If layer is same and box does not want to collide with same, don't resolve collisions
 					if ((box1.layer == box2.layer) && (!box1.collideWithSame || !box2.collideWithSame))
 					{
+						
 					}
 					else
 					{
-						Mtv(body1, box1, body2, box2);
+						Mtv(body1, box1, body2, box2, dt);
 						box1.hasCollided = true;
 
 					}
@@ -89,12 +90,8 @@ namespace game
 		}
 	}
 
-	void PhysicsManager::Mtv(RigidBody& body, const Box& box, RigidBody& otherBody, const Box& otherBox) const
+	void PhysicsManager::Mtv(RigidBody& body, const Box& box, RigidBody& otherBody, const Box& otherBox, const sf::Time dt) const
 	{
-
-		float mtvX = std::numeric_limits<float>::max();
-		float mtvY = std::numeric_limits<float>::max();
-		bool bod1ToBod2 = false;
 
 		const auto bod1Max = core::Vec2f(body.position.x + box.extends.x, body.position.y + box.extends.y);
 		const auto bod1Min = core::Vec2f(body.position.x - box.extends.x, body.position.y - box.extends.y);
@@ -102,102 +99,47 @@ namespace game
 		const auto bod2Max = core::Vec2f(otherBody.position.x + otherBox.extends.x, otherBody.position.y + otherBox.extends.y);
 		const auto bod2Min = core::Vec2f(otherBody.position.x - otherBox.extends.x, otherBody.position.y - otherBox.extends.y);
 
+		const auto box1IsDynamic = box.collisionType == CollisionType::DYNAMIC;
+		const auto box2IsDynamic = otherBox.collisionType == CollisionType::DYNAMIC;
 
-		if (box.collisionType == CollisionType::DYNAMIC && otherBox.collisionType == CollisionType::DYNAMIC)
+
+		float mtvX = bod1Max.x - bod2Min.x;
+		mtvX = mtvX > bod2Max.x - bod1Min.x ? bod1Min.x - bod2Max.x : mtvX;
+
+		float mtvY = bod1Max.y - bod2Min.y;
+		mtvY = mtvY > bod2Max.y - bod1Min.y ? bod1Min.y - bod2Max.y : mtvY;
+
+		if (box1IsDynamic && box2IsDynamic)
 		{
-			if (mtvX > std::abs(bod1Max.x - bod2Min.x))
-			{
-				mtvX = bod1Max.x - bod2Min.x;
-			}
-			if (mtvX > std::abs(bod2Max.x - bod1Min.x))
-			{
-				mtvX = bod2Max.x - bod1Min.x;
-				bod1ToBod2 = true;
-			}
+			mtvX /= 2.0f;
+			mtvY /= 2.0f;
+		}
 
-			if (mtvY > std::abs(bod1Max.y - bod2Min.y))
+		if (std::abs(mtvX) < std::abs(mtvY))
+		{
+			if (box1IsDynamic)
 			{
-				mtvY = bod1Max.y - bod2Min.y;
+				body.position.x -= mtvX;
 			}
-			if (mtvY > std::abs(bod2Max.y - bod1Min.y))
+			if (box2IsDynamic)
 			{
-				mtvY = bod2Max.y - bod1Min.y;
-				bod1ToBod2 = true;
-			}
-
-			if (std::abs(mtvX) < std::abs(mtvY))
-			{
-				if (bod1ToBod2)
-				{
-					body.position.x += mtvX / 2;
-					otherBody.position.x -= mtvX / 2;
-				}
-				else
-				{
-					body.position.x -= mtvX / 2;
-					otherBody.position.x += mtvX / 2;
-				}
-			}
-			else
-			{
-				if (bod1ToBod2)
-				{
-					body.position.y += mtvY / 2;
-					otherBody.position.y -= mtvY / 2;
-				}
-				else
-				{
-					body.position.y -= mtvY / 2;
-					otherBody.position.y += mtvY / 2;
-				}
+				otherBody.position.x += mtvX;
 			}
 		}
 		else
 		{
-			if (mtvX > bod1Max.x - bod2Min.x)
+			if (box1IsDynamic)
 			{
-				mtvX = bod1Max.x - bod2Min.x;
+				body.position.y -= mtvY;
 			}
-			if (mtvX > bod2Max.x - bod1Min.x)
+			if (box2IsDynamic)
 			{
-				mtvX = bod1Min.x - bod2Max.x;
+				otherBody.position.y += mtvY;
 			}
-
-			if (mtvY > std::abs(bod1Max.y - bod2Min.y))
-			{
-				mtvY = bod1Max.y - bod2Min.y;
-			}
-			if (mtvY > std::abs(bod2Max.y - bod1Min.y))
-			{
-				mtvY = bod1Min.y - bod2Max.y;
-			}
-
-			if (box.collisionType == CollisionType::DYNAMIC && otherBox.collisionType == CollisionType::STATIC)
-			{
-				if (std::abs(mtvX) < std::abs(mtvY))
-				{
-					body.position.x += mtvX;
-				}
-				else
-				{
-
-					body.position.y += mtvY;
-				}
-			}
-			else if (otherBox.collisionType == CollisionType::DYNAMIC && box.collisionType == CollisionType::STATIC)
-			{
-				if (std::abs(mtvX) < std::abs(mtvY))
-				{
-					otherBody.position.x += mtvX;
-				}
-				else
-				{
-					otherBody.position.y += mtvY;
-				}
-			}
-
 		}
+
 	}
+
 
 	void PhysicsManager::SetBody(core::Entity entity, const RigidBody& body)
 	{
