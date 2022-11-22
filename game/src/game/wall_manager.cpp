@@ -34,10 +34,6 @@ namespace game
 				auto& wall = components_[entity];
 				auto wallBody = physicsManager_.GetBody(entity);
 
-			const auto input = wall.input;
-			const bool down = input & PlayerInputEnum::PlayerInput::DOWN;
-			if (down)
-				core::LogDebug("OOOOOO");
 
 				if (wall.wallType == WallType::WallStatic || wall.wallType == WallType::WallArena)
 				{

@@ -54,6 +54,7 @@ void GameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position)
     transformManager_.SetPosition(entity, position);
     
     rollbackManager_.SpawnPlayer(playerNumber, entity, spawnerEntity, position);
+    // TODO : Return l'entité du spawner ici
 }
 
 core::Entity GameManager::GetEntityFromPlayerNumber(PlayerNumber playerNumber) const
@@ -349,6 +350,7 @@ void ClientGameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f posit
 {
     core::LogDebug(fmt::format("Spawn player: {}", playerNumber));
 
+    // TODO : Chopper l'id du spawner ici et ajouter le rectangle shape component
     GameManager::SpawnPlayer(playerNumber, position);
     const auto entity = GetEntityFromPlayerNumber(playerNumber);
     spriteManager_.AddComponent(entity);

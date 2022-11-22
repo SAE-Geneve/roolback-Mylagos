@@ -7,11 +7,11 @@
 #endif
 namespace game
 {
-	PlayerCharacterManager::PlayerCharacterManager(core::EntityManager& entityManager, PhysicsManager& physicsManager, GameManager& gameManager, WallSpawnerManager& wallSpawnerManager) :
+	PlayerCharacterManager::PlayerCharacterManager(core::EntityManager& entityManager, PhysicsManager& physicsManager, GameManager& gameManager) :
 		ComponentManager(entityManager),
 		physicsManager_(physicsManager),
-		gameManager_(gameManager),
-		wallSpawnerManager_(wallSpawnerManager)
+		gameManager_(gameManager)
+		
 	{
 
 	}
@@ -36,7 +36,6 @@ namespace game
 			const bool right = input & PlayerInputEnum::PlayerInput::RIGHT;
 			const bool left = input & PlayerInputEnum::PlayerInput::LEFT;
 			const bool up = input & PlayerInputEnum::PlayerInput::UP;
-			const bool down = input & PlayerInputEnum::PlayerInput::DOWN;
 
 			playerBox.collideWithSame = true;
 			playerBox.collisionType = CollisionType::DYNAMIC;
@@ -56,7 +55,6 @@ namespace game
 					playerBody.velocity.y += game::gravity * dt.asSeconds();
 					playerBody.velocity.y += 20 * dt.asSeconds();
 				}
-				//core::LogDebug(std::to_string(playerCharacter.jumpBuffer));
 			}
 			else if (!up || playerCharacter.jumpBuffer > 20)
 			{
@@ -99,35 +97,9 @@ namespace game
 			playerBody.velocity.x *= 0.85f;
 
 			playerBody.velocity.x += playerCharacter.summForceX * dt.asSeconds();
-			//core::LogDebug(fmt::format("Player's acceleration is x("  + std::to_string(playerBody.velocity.x) + ") : y(" + std::to_string(playerBody.velocity.y) + ")\n"));
 
+			
 
-
-			if (input & PlayerInputEnum::PlayerInput::BUILD)
-			{
-				if (!playerCharacter.isbuilding)
-				{
-					const auto tempVec = static_cast<sf::Vector2f>(sf::Mouse::getPosition());
-					core::Vec2f mouse = tempVec;
-
-
-					playerCharacter.isbuilding = true;
-				}
-
-			}
-			else
-			{
-				if (playerCharacter.isbuilding)
-				{
-					gameManager_.SpawnWall(playerCharacter.playerNumber, playerCharacter.wallSpawnPosition);
-					playerCharacter.isbuilding = false;
-				}
-			}
-
-			auto spawner = wallSpawnerManager_.GetComponent(playerEntity);
-			spawner.verticalVelocity = -5.0f;
-			//core::LogDebug(std::to_string(spawner.verticalVelocity));
-			wallSpawnerManager_.SetComponent(playerEntity, spawner);
 
 			physicsManager_.SetBox(playerEntity, playerBox);
 			physicsManager_.SetBody(playerEntity, playerBody);

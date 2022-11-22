@@ -173,6 +173,11 @@ namespace game
 		return bodyManager_.GetComponent(entity);
 	}
 
+	RigidBody& PhysicsManager::GetBody(core::Entity entity)
+	{
+		return bodyManager_.GetComponent(entity);
+	}
+
 	void PhysicsManager::AddBody(core::Entity entity)
 	{
 		bodyManager_.AddComponent(entity);

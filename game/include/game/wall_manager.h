@@ -15,12 +15,10 @@ namespace game
 	};
 
 	/**
-	 * \brief Bullet is a struct that contains info about a player bullet (when it will be destroyed and whose player it is).
+	 * \brief Bullet is a struct that contains info about a Wall.
 	 */
 	struct Wall
 	{
-		float remainingTime = 0.0f;
-		PlayerInput input = 0u;
 		bool isOnGround = false;
 
 		bool hasCollided = false;

@@ -12,18 +12,19 @@ PlayerInput GetPlayerInput(int index)
     case 0:
     {
         PlayerInput clientInput1 = 0;
-        clientInput1 = clientInput1 | (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ?
+        clientInput1 = clientInput1 | (sf::Keyboard::isKeyPressed(sf::Keyboard::A) ?
                 PlayerInputEnum::PlayerInput::LEFT : PlayerInputEnum::PlayerInput::NONE);
-        clientInput1 = clientInput1 | (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ?
+        clientInput1 = clientInput1 | (sf::Keyboard::isKeyPressed(sf::Keyboard::D) ?
                 PlayerInputEnum::PlayerInput::RIGHT : PlayerInputEnum::PlayerInput::NONE);
-        clientInput1 = clientInput1 | (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) ?
+        clientInput1 = clientInput1 | (sf::Keyboard::isKeyPressed(sf::Keyboard::W) ?
                 PlayerInputEnum::PlayerInput::UP : PlayerInputEnum::PlayerInput::NONE);
-        clientInput1 = clientInput1 | (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ?
-                PlayerInputEnum::PlayerInput::DOWN : PlayerInputEnum::PlayerInput::NONE);
-        clientInput1 = clientInput1 | (sf::Keyboard::isKeyPressed(sf::Keyboard::RControl) ?
-                PlayerInputEnum::PlayerInput::SHOOT : PlayerInputEnum::PlayerInput::NONE);
-        clientInput1 = clientInput1 | (sf::Mouse::isButtonPressed(sf::Mouse::Left) ?
-            PlayerInputEnum::PlayerInput::BUILD : PlayerInputEnum::PlayerInput::NONE);
+        clientInput1 = clientInput1 | (sf::Keyboard::isKeyPressed(sf::Keyboard::S) ?
+                PlayerInputEnum::PlayerInput::BUILD : PlayerInputEnum::PlayerInput::NONE);
+        clientInput1 = clientInput1 | (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) ?
+            PlayerInputEnum::PlayerInput::BM_LEFT : PlayerInputEnum::PlayerInput::NONE);
+        clientInput1 = clientInput1 | (sf::Keyboard::isKeyPressed(sf::Keyboard::E) ?
+            PlayerInputEnum::PlayerInput::BM_RIGHT : PlayerInputEnum::PlayerInput::NONE);
+        
 
 
         return clientInput1;
@@ -31,18 +32,19 @@ PlayerInput GetPlayerInput(int index)
     case 1:
     {
         PlayerInput clientInput2 = 0;
-        clientInput2 = clientInput2 | (sf::Keyboard::isKeyPressed(sf::Keyboard::A) ?
+        clientInput2 = clientInput2 | (sf::Keyboard::isKeyPressed(sf::Keyboard::J) ?
                 PlayerInputEnum::PlayerInput::LEFT : PlayerInputEnum::PlayerInput::NONE);
-        clientInput2 = clientInput2 | (sf::Keyboard::isKeyPressed(sf::Keyboard::D) ?
+        clientInput2 = clientInput2 | (sf::Keyboard::isKeyPressed(sf::Keyboard::L) ?
                 PlayerInputEnum::PlayerInput::RIGHT : PlayerInputEnum::PlayerInput::NONE);
-        clientInput2 = clientInput2 | (sf::Keyboard::isKeyPressed(sf::Keyboard::W) ?
+        clientInput2 = clientInput2 | (sf::Keyboard::isKeyPressed(sf::Keyboard::I) ?
                 PlayerInputEnum::PlayerInput::UP : PlayerInputEnum::PlayerInput::NONE);
-        clientInput2 = clientInput2 | (sf::Keyboard::isKeyPressed(sf::Keyboard::S) ?
-                PlayerInputEnum::PlayerInput::DOWN : PlayerInputEnum::PlayerInput::NONE);
-        clientInput2 = clientInput2 | (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) ?
-                PlayerInputEnum::PlayerInput::SHOOT : PlayerInputEnum::PlayerInput::NONE);
-        clientInput2 = clientInput2 | (sf::Mouse::isButtonPressed(sf::Mouse::Right) ?
-            PlayerInputEnum::PlayerInput::BUILD : PlayerInputEnum::PlayerInput::NONE);
+        clientInput2 = clientInput2 | (sf::Keyboard::isKeyPressed(sf::Keyboard::K) ?
+                PlayerInputEnum::PlayerInput::BUILD : PlayerInputEnum::PlayerInput::NONE);
+        clientInput2 = clientInput2 | (sf::Keyboard::isKeyPressed(sf::Keyboard::U) ?
+            PlayerInputEnum::PlayerInput::BM_LEFT : PlayerInputEnum::PlayerInput::NONE);
+        clientInput2 = clientInput2 | (sf::Keyboard::isKeyPressed(sf::Keyboard::O) ?
+            PlayerInputEnum::PlayerInput::BM_RIGHT : PlayerInputEnum::PlayerInput::NONE);
+        
 
         return clientInput2;
     }

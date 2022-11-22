@@ -49,6 +49,7 @@ namespace game
 	constexpr float wallMaxHeight = 3.0f;
 	constexpr float wallMinHeight = -3.0f;
 	constexpr float wallSize = 0.25f;
+	constexpr float spawnerHeight = 2.75f;
 
 	/**
 	 * \brief windowBufferSize is the size of input stored by a client. 5 seconds of frame at 50 fps
@@ -115,11 +116,11 @@ namespace game
 		{
 			NONE = 0u,
 			UP = 1u << 0u,
-			DOWN = 1u << 1u,
+			BUILD = 1u << 1u,
 			LEFT = 1u << 2u,
 			RIGHT = 1u << 3u,
-			SHOOT = 1u << 4u,
-			BUILD = 1u << 5u,
+			BM_LEFT = 1u << 4u,
+			BM_RIGHT = 1u << 5u
 		};
 	}
 }

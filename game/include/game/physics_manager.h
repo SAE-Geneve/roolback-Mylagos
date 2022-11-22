@@ -94,6 +94,7 @@ namespace game
 		void FixedUpdate(sf::Time dt);
 		void CollisionResponse(RigidBody& body, const Box& box, RigidBody& otherBody, const Box& otherBox) const;
 		[[nodiscard]] const RigidBody& GetBody(core::Entity entity) const;
+		RigidBody& GetBody(core::Entity);
 		void SetBody(core::Entity entity, const RigidBody& body);
 		void AddBody(core::Entity entity);
 

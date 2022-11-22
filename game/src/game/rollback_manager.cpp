@@ -16,16 +16,15 @@ namespace game
 		gameManager_(gameManager), entityManager_(entityManager),
 		currentTransformManager_(entityManager),
 		currentPhysicsManager_(entityManager),
-		currentPlayerManager_(entityManager, currentPhysicsManager_, gameManager_, currentWallSpawnerManager_),
+		currentPlayerManager_(entityManager, currentPhysicsManager_, gameManager_),
 		currentBulletManager_(entityManager, gameManager),
 		currentWallManager_(entityManager, currentPhysicsManager_, gameManager_),
-		currentWallSpawnerManager_(entityManager, currentPhysicsManager_, gameManager_),
+		currentWallSpawnerManager_(entityManager, currentPhysicsManager_, gameManager_, currentPlayerManager_),
 		lastValidatePhysicsManager_(entityManager),
-		lastValidatePlayerManager_(entityManager, 
-		lastValidatePhysicsManager_, gameManager_, lastValidateWallSpawnerManager_),
+		lastValidatePlayerManager_(entityManager, lastValidatePhysicsManager_, gameManager_),
 		lastValidateBulletManager_(entityManager, gameManager),
 		lastValidateWallManager_(entityManager, lastValidatePhysicsManager_, gameManager_),
-		lastValidateWallSpawnerManager_(entityManager, lastValidatePhysicsManager_, gameManager_)
+		lastValidateWallSpawnerManager_(entityManager, lastValidatePhysicsManager_, gameManager_, lastValidatePlayerManager_)
 	{
 		for (auto& input : inputs_)
 		{
@@ -330,7 +329,7 @@ namespace game
 		box.layer = CollisionLayer::WALL;
 		box.collideWithSame = true;
 		box.collisionType = CollisionType::STATIC;
-		wall.remainingTime = 500.0f;
+	
 		
 
 		currentPhysicsManager_.AddBody(entity);
@@ -355,28 +354,28 @@ namespace game
 	}
 
 
-	void RollbackManager::SpawnPlayer(PlayerNumber playerNumber, core::Entity entity, core::Entity spawnerEntity, core::Vec2f position)
+	void RollbackManager::SpawnPlayer(PlayerNumber playerNumber, core::Entity playerEntity, core::Entity spawnerEntity, core::Vec2f position)
 	{
 
 #ifdef TRACY_ENABLE
 		ZoneScoped;
 #endif
-		WallSpawner playerSpawner;
-		playerSpawner.playerNumber = playerNumber;
+		WallSpawner wallSpawner;
+		wallSpawner.playerNumber = playerNumber;
+		wallSpawner.playerEntity = playerEntity;
 
 		RigidBody spawnerBody;
-		spawnerBody.position = position;
+		spawnerBody.position = core::Vec2f(0, game::spawnerHeight);
 		Box spawnerBox;
-		spawnerBox.extends = core::Vec2f::one() * 0.25f;
-		spawnerBox.layer = CollisionLayer::NONE;
-		spawnerBox.collideWithSame = false;
+		spawnerBox.extends = core::Vec2f::one() * 0.27f;
+		spawnerBox.layer = CollisionLayer::NONE; 
 
 		spawnerBox.collisionType = CollisionType::NONE;
 
 		currentWallSpawnerManager_.AddComponent(spawnerEntity);
-		currentWallSpawnerManager_.SetComponent(spawnerEntity, playerSpawner);
+		currentWallSpawnerManager_.SetComponent(spawnerEntity, wallSpawner);
 		lastValidateWallSpawnerManager_.AddComponent(spawnerEntity);
-		lastValidateWallSpawnerManager_.SetComponent(spawnerEntity, playerSpawner);
+		lastValidateWallSpawnerManager_.SetComponent(spawnerEntity, wallSpawner);
 
 		currentPhysicsManager_.AddBody(spawnerEntity);
 		currentPhysicsManager_.SetBody(spawnerEntity, spawnerBody);
@@ -389,8 +388,7 @@ namespace game
 		lastValidatePhysicsManager_.SetBox(spawnerEntity, spawnerBox);
 
 		currentTransformManager_.AddComponent(spawnerEntity);
-		currentTransformManager_.SetPosition(spawnerEntity, position);
-		currentTransformManager_.SetRotation(spawnerEntity, core::Degree(45.0f));
+		currentTransformManager_.SetPosition(spawnerEntity, core::Vec2f(0, game::spawnerHeight));
 
 		RigidBody playerBody;
 		playerBody.position = position;
@@ -404,30 +402,25 @@ namespace game
 		PlayerCharacter playerCharacter;
 		playerCharacter.playerNumber = playerNumber;
 
-		currentWallSpawnerManager_.AddComponent(entity);
-		currentWallSpawnerManager_.SetComponent(entity, playerSpawner);
-		lastValidateWallSpawnerManager_.AddComponent(entity);
-		lastValidateWallSpawnerManager_.SetComponent(entity, playerSpawner);
+		currentPlayerManager_.AddComponent(playerEntity);
+		currentPlayerManager_.SetComponent(playerEntity, playerCharacter);
 
-		currentPlayerManager_.AddComponent(entity);
-		currentPlayerManager_.SetComponent(entity, playerCharacter);
+		currentPhysicsManager_.AddBody(playerEntity);
+		currentPhysicsManager_.SetBody(playerEntity, playerBody);
+		currentPhysicsManager_.AddBox(playerEntity);
+		currentPhysicsManager_.SetBox(playerEntity, playerBox);
 
-		currentPhysicsManager_.AddBody(entity);
-		currentPhysicsManager_.SetBody(entity, playerBody);
-		currentPhysicsManager_.AddBox(entity);
-		currentPhysicsManager_.SetBox(entity, playerBox);
+		lastValidatePlayerManager_.AddComponent(playerEntity);
+		lastValidatePlayerManager_.SetComponent(playerEntity, playerCharacter);
 
-		lastValidatePlayerManager_.AddComponent(entity);
-		lastValidatePlayerManager_.SetComponent(entity, playerCharacter);
+		lastValidatePhysicsManager_.AddBody(playerEntity);
+		lastValidatePhysicsManager_.SetBody(playerEntity, playerBody);
+		lastValidatePhysicsManager_.AddBox(playerEntity);
+		lastValidatePhysicsManager_.SetBox(playerEntity, playerBox);
 
-		lastValidatePhysicsManager_.AddBody(entity);
-		lastValidatePhysicsManager_.SetBody(entity, playerBody);
-		lastValidatePhysicsManager_.AddBox(entity);
-		lastValidatePhysicsManager_.SetBox(entity, playerBox);
-
-		currentTransformManager_.AddComponent(entity);
-		currentTransformManager_.SetPosition(entity, position);
-		currentTransformManager_.SetRotation(entity, core::Degree(45.0f));
+		currentTransformManager_.AddComponent(playerEntity);
+		currentTransformManager_.SetPosition(playerEntity, position);
+		currentTransformManager_.SetRotation(playerEntity, core::Degree(45.0f));
 	}
 
 	PlayerInput RollbackManager::GetInputAtFrame(PlayerNumber playerNumber, Frame frame) const
