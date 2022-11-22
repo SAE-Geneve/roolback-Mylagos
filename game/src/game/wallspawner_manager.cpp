@@ -12,7 +12,7 @@ namespace game
 	{}
 
 
-	void WallSpawnerManager::FixedUpdate(const sf::Time dt)
+	void WallSpawnerManager::FixedUpdate(const sf::Time)
 	{
 		for (core::Entity entity = 0; entity < entityManager_.GetEntitiesSize(); entity++)
 		{
@@ -27,31 +27,40 @@ namespace game
 
 			const auto inputs = player.input;
 
-			core::LogDebug(std::to_string(wallBody.position.y));
-
 			const bool down = inputs & PlayerInputEnum::PlayerInput::BUILD;
 			const bool seven = inputs & PlayerInputEnum::PlayerInput::BM_LEFT;
 			const bool nine = inputs & PlayerInputEnum::PlayerInput::BM_RIGHT;
-
-			wallBody.velocity.x += ((seven ? -1.0f : 0.0f) + (nine ? 1.0f : 0.0f)) * 20.0f * dt.asSeconds();
-
-
-			if (down)
+			
+			if (wallSpawner.movementFrames == 0)
 			{
-				if (!player.isbuilding)
+				if(seven || nine)
 				{
-
-
-
-					player.isbuilding = true;
+					wallBody.position.x += ((seven ? -1.0f : 0.0f) + (nine ? 1.0f : 0.0f)) * 0.5f;
+					wallSpawner.movementFrames++;
 				}
-
 			}
-			else
+
+
+
+			if(wallSpawner.movementFrames!=0)
+			{
+				wallSpawner.movementFrames++;
+				if(wallSpawner.movementFrames == 7)
+				{
+					wallSpawner.movementFrames = 0;
+				}
+			}
+			
+
+			if (!down && !player.isbuilding)
+			{
+					player.isbuilding = true;
+			}
+			if (down && player.isbuilding)
 			{
 				if (player.isbuilding)
 				{
-					gameManager_.SpawnWall(player.playerNumber, player.wallSpawnPosition);
+					gameManager_.SpawnWall(player.playerNumber, wallBody.position);
 					player.isbuilding = false;
 				}
 			}

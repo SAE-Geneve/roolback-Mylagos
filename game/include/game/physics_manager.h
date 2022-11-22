@@ -27,7 +27,8 @@ namespace game
 	{
 		NONE = 0,
 		DYNAMIC = 1,
-		STATIC = 2
+		STATIC = 2,
+		ARENA = 3
 	};
 
 	/**

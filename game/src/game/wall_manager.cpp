@@ -41,15 +41,13 @@ namespace game
 				}
 
 
-				/*if (!wall.isOnGround)
-				{*/
 					if (wallBody.velocity.y == 0.0f && (!(wall.wallType == WallType::WallStatic) || !(wall.wallType == WallType::WallArena)))
 					{
 						wall.isOnGround = wall.hasCollided;
 						wall.hasCollided = true;
 					}
-					wallBody.velocity += core::Vec2f(0.0f, game::gravity * (static_cast<float>(wall.wallType) / 100.0f) * wallSpeedRatio(wallBody.position.y)) * dt.asSeconds();
-				/*}*/
+					wallBody.velocity += core::Vec2f(0.0f, game::gravity * (static_cast<float>(wall.wallType) / 100.0f)/* * wallSpeedRatio(wallBody.position.y)*/) * dt.asSeconds();
+
 
 				physicsManager_.SetBody(entity, wallBody);
 

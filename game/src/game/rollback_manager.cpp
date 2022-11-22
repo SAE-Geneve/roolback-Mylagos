@@ -289,40 +289,18 @@ namespace game
 			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
 
 		}
-		else if (i == 6)
+		else if (i == 3)
 		{
 			body.position = core::Vec2f(1.0f, 3.5f);
 			box.extends = core::Vec2f(100.0f, 0.25f);
 			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
 
 		}
-		else if (i == 3)
-		{
-			body.position = core::Vec2f(1.0f, -1.5f);
-			box.extends = core::Vec2f(0.25f, 0.25f);
-			wall.isOnGround = false;
-			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
-			wall.wallType = WallType::WallDouble;
-		}
-		else if (i == 4)
-		{
-			body.position = core::Vec2f(-1.0f, 0.5f);
-			box.extends = core::Vec2f(0.25f, 0.25f);
-			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
-			wall.wallType = WallType::WallDouble;
-		}
-		else if (i == 5)
-		{
-			body.position = core::Vec2f(1.0f, 1.5f);
-			box.extends = core::Vec2f(0.25f, 0.25f);
-			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
-			wall.wallType = WallType::WallDouble;
-		}
 		else
 		{
-			body.position = core::Vec2f((3.0f) * (1.0f - 2.0f * static_cast<float>(i % 2)), 1.0f);
-			box.extends = core::Vec2f(0.25f, 100.0f);
-			pos = core::Vec2f((3.0f) * (1.0f - 2.0f * static_cast<float>(i % 2)), 1.0f);
+			body.position = core::Vec2f((2.75f) * (1.0f - 2.0f * static_cast<float>(i % 2)), 0.0f);
+			box.extends = core::Vec2f(0.50f, 100.0f);
+			pos = core::Vec2f((2.75f) * (1.0f - 2.0f * static_cast<float>(i % 2)), 1.0f);
 		}
 
 
@@ -367,7 +345,7 @@ namespace game
 		RigidBody spawnerBody;
 		spawnerBody.position = core::Vec2f(0, game::spawnerHeight);
 		Box spawnerBox;
-		spawnerBox.extends = core::Vec2f::one() * 0.27f;
+		spawnerBox.extends = core::Vec2f::one() * game::wallSize;
 		spawnerBox.layer = CollisionLayer::NONE; 
 
 		spawnerBox.collisionType = CollisionType::NONE;
@@ -505,7 +483,7 @@ namespace game
 		//TODO add wall length when on it
 		wallBox.extends = core::Vec2f::one() * game::wallSize;
 
-		wall.wallType = WallType::WallDouble;
+		wall.wallType = WallType::WallSimple;
 		wallBox.collisionType = CollisionType::STATIC;
 		wallBox.collideWithSame = true;
 

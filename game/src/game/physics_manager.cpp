@@ -93,10 +93,7 @@ namespace game
 	void game::PhysicsManager::CollisionResponse(RigidBody& body, const Box& box, RigidBody& otherBody,
 		const Box& otherBox) const
 	{
-		if(box.collisionType == CollisionType::NONE || otherBox.collisionType == CollisionType::NONE)
-		{
-			return;
-		}
+
 
 		const auto bod1Max = core::Vec2f(body.position.x + box.extends.x, body.position.y + box.extends.y);
 		const auto bod1Min = core::Vec2f(body.position.x - box.extends.x, body.position.y - box.extends.y);
@@ -123,18 +120,23 @@ namespace game
 		}
 		else if (std::abs(mtvX) < std::abs(mtvY))
 		{
-			if (box1IsDynamic && !box2IsDynamic)
+			if (box1IsDynamic && otherBox.collisionType == CollisionType::STATIC)
 			{
 				body.position.x -= mtvX;
 			}
-			if (box2IsDynamic && !box1IsDynamic)
+			if (box2IsDynamic && box.collisionType == CollisionType::STATIC)
+			{
+				otherBody.position.x += mtvX;
+			}
+			if(box.collisionType == CollisionType::STATIC && otherBox.collisionType == CollisionType::NONE)
 			{
 				otherBody.position.x += mtvX;
 			}
 		}
 		else
 		{
-			if (box1IsDynamic && !box2IsDynamic)
+			
+			if (box1IsDynamic && otherBox.collisionType == CollisionType::STATIC)
 			{
 				body.position.y -= mtvY;
 				if(body.velocity.y < 0.0f)
@@ -143,7 +145,7 @@ namespace game
 				}
 
 			}
-			if (box2IsDynamic && !box1IsDynamic)
+			if (box2IsDynamic && box.collisionType == CollisionType::STATIC)
 			{
 				otherBody.position.y += mtvY;
 				if (otherBody.velocity.y < 0.0f)
@@ -151,7 +153,7 @@ namespace game
 					otherBody.velocity.y = 0.0f;
 				}
 			}
-			if(!box1IsDynamic && !box2IsDynamic)
+			if(box.collisionType == CollisionType::STATIC && otherBox.collisionType == CollisionType::STATIC)
 			{
 				otherBody.position.y += mtvY;
 				if (otherBody.velocity.y < 0.0f)

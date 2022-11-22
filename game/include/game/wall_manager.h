@@ -9,8 +9,6 @@ namespace game
 	{
 		WallStatic = 0,
 		WallArena = 1,
-		WallTriple = 050,
-		WallDouble = 075,
 		WallSimple = 100
 	};
 

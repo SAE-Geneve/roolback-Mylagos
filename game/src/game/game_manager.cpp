@@ -185,14 +185,7 @@ void ClientGameManager::Update(sf::Time dt)
                 static_cast<core::EntityMask>(core::ComponentType::SPRITE)))
             {
                 const auto& player = rollbackManager_.GetPlayerCharacterManager().GetComponent(entity);
-                /*
-                if (player.invincibilityTime > 0.0f)
-                {
-                    //auto leftV = std::fmod(player.invincibilityTime, invincibilityFlashPeriod);
-                    //auto rightV = invincibilityFlashPeriod / 2.0f;
-                    //core::LogDebug(fmt::format("Comparing {} and {} with time: {}", leftV, rightV, player.invincibilityTime));
-                }
-                */
+
                 if (player.invincibilityTime > 0.0f &&
                     std::fmod(player.invincibilityTime, invincibilityFlashPeriod) > invincibilityFlashPeriod / 2.0f)
                 {
@@ -208,7 +201,6 @@ void ClientGameManager::Update(sf::Time dt)
             {
                 transformManager_.SetPosition(entity, rollbackManager_.GetTransformManager().GetPosition(entity));
                 transformManager_.SetScale(entity, rollbackManager_.GetTransformManager().GetScale(entity));
-                //transformManager_.SetRotation(entity, rollbackManager_.GetTransformManager().GetRotation(entity));
             }
         }
     }
@@ -217,11 +209,7 @@ void ClientGameManager::Update(sf::Time dt)
     {
         FixedUpdate();
         fixedTimer_ -= fixedPeriod;
-
     }
-
-
-
 }
 
 void ClientGameManager::End()
@@ -407,7 +395,6 @@ void ClientGameManager::FixedUpdate()
             }
             else
             {
-
                 return;
             }
         }
