@@ -7,10 +7,11 @@ namespace game
 {
 	enum class WallType
 	{
-		STATIC = 0,
-		WallSimple = 100,
-		WallDouble = 125,
-		WallTriple = 150
+		WallStatic = 0,
+		WallArena = 1,
+		WallTriple = 050,
+		WallDouble = 075,
+		WallSimple = 100
 	};
 
 	/**
@@ -19,8 +20,12 @@ namespace game
 	struct Wall
 	{
 		float remainingTime = 0.0f;
+		PlayerInput input = 0u;
+		bool isOnGround = false;
+
+		bool hasCollided = false;
 		PlayerNumber playerNumber = INVALID_PLAYER;
-		WallType wallType = WallType::STATIC;
+		WallType wallType = WallType::WallStatic;
 
 		/**
 		 * \brief The lower the wall get the higher this func returns (0 to 1)

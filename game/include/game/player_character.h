@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/System/Time.hpp>
+#include <SFML/Window/Mouse.hpp>
 
 #include "game_globals.h"
 
@@ -18,7 +19,7 @@ struct PlayerCharacter
     short health = playerHealth;
     float invincibilityTime = 0.0f;
     float acceleration = 0.0f;
-    float jumpBuffer = 0.0f;
+    int jumpBuffer = 0;
     int jumpCooldownCount = 0;
     bool isOnGround = false;
 
@@ -28,11 +29,18 @@ struct PlayerCharacter
     bool otherPlayerIsOnLeft = false;
     bool otherPlayerIsOnRight = false;
     float collisionAccelerationOverTime = 0.0f;
+
+    core::Vec2f wallSpawnPosition{};
+    bool isbuilding = false;
+    core::Vec2f windowSize_{};
+    core::Vec2f center_{};
 };
 
 class PhysicsManager;
 
 class GameManager;
+
+class WallSpawnerManager;
 
 /**
  * \brief PlayerCharacterManager is a ComponentManager that holds all the PlayerCharacter in the game.
@@ -40,11 +48,12 @@ class GameManager;
 class PlayerCharacterManager : public core::ComponentManager<PlayerCharacter, static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)>
 {
 public:
-    explicit PlayerCharacterManager(core::EntityManager& entityManager, PhysicsManager& physicsManager, GameManager& gameManager);
+    explicit PlayerCharacterManager(core::EntityManager& entityManager, PhysicsManager& physicsManager, GameManager& gameManager, WallSpawnerManager& wallSpawnerManager);
     void FixedUpdate(sf::Time dt);
 
 private:
     PhysicsManager& physicsManager_;
     GameManager& gameManager_;
+    WallSpawnerManager& wallSpawnerManager_;
 };
 }

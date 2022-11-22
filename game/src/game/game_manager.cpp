@@ -29,6 +29,7 @@ GameManager::GameManager() :
     for (int i = 0; i<7; i++)
     {
 	    const auto entity = entityManager_.CreateEntity();
+
     	transformManager_.AddComponent(entity);
     	transformManager_.SetPosition(entity, core::Vec2f::one());
     	transformManager_.SetScale(entity, core::Vec2f(1.0f, 1.0f));
@@ -44,6 +45,8 @@ void GameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position)
     core::LogDebug("[GameManager] Spawning new player");
     const auto entity = entityManager_.CreateEntity();
     playerEntityMap_[playerNumber] = entity;
+
+    
 
     transformManager_.AddComponent(entity);
     transformManager_.SetPosition(entity, position);
@@ -87,6 +90,18 @@ core::Entity GameManager::SpawnBullet(PlayerNumber playerNumber, core::Vec2f pos
     transformManager_.SetScale(entity, core::Vec2f::one() * bulletScale);
     transformManager_.SetRotation(entity, core::Degree(0.0f));
     rollbackManager_.SpawnBullet(playerNumber, entity, position, velocity);
+    return entity;
+}
+
+core::Entity GameManager::SpawnWall(PlayerNumber, core::Vec2f position)
+{
+    const core::Entity entity = entityManager_.CreateEntity();
+
+    transformManager_.AddComponent(entity);
+    transformManager_.SetPosition(entity, position);
+    transformManager_.SetScale(entity, core::Vec2f::one() * game::wallSize);
+    transformManager_.SetRotation(entity, core::Degree(0.0f));
+    rollbackManager_.SpawnWall(entity, position);
     return entity;
 }
 
@@ -353,6 +368,17 @@ core::Entity ClientGameManager::SpawnBullet(PlayerNumber playerNumber, core::Vec
     return entity;
 }
 
+core::Entity game::ClientGameManager::SpawnWall(PlayerNumber playerNumber, core::Vec2f position)
+{
+    const auto entity = GameManager::SpawnWall(playerNumber, position);
+
+    spriteManager_.AddComponent(entity);
+    spriteManager_.SetTexture(entity, bulletTexture_);
+    spriteManager_.SetOrigin(entity, sf::Vector2f(bulletTexture_.getSize()) / 2.0f);
+    spriteManager_.SetColor(entity, playerColors[playerNumber]);
+
+	return entity;
+}
 
 void ClientGameManager::FixedUpdate()
 {

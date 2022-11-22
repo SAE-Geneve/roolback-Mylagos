@@ -20,27 +20,42 @@ namespace game
 		return (1 - myPos / heightTotal);
 	}
 
-	void WallManager::FixedUpdate(sf::Time dt)
+	void WallManager::FixedUpdate(const sf::Time dt)
 	{
 		for (core::Entity entity = 0; entity < entityManager_.GetEntitiesSize(); entity++)
 		{
-			if (entityManager_.HasComponent(entity, static_cast<core::EntityMask>(ComponentType::DESTROYED)))
+			/*if (entityManager_.HasComponent(entity, static_cast<core::EntityMask>(ComponentType::DESTROYED)))
 			{
 				continue;
-			}
+			}*/
+
 			if (entityManager_.HasComponent(entity, static_cast<core::EntityMask>(ComponentType::WALL)))
 			{
-				const auto& wall = components_[entity];
-				auto wallEntity = physicsManager_.GetBody(entity);
+				auto& wall = components_[entity];
+				auto wallBody = physicsManager_.GetBody(entity);
 
-				if (wall.wallType == WallType::STATIC)
+			const auto input = wall.input;
+			const bool down = input & PlayerInputEnum::PlayerInput::DOWN;
+			if (down)
+				core::LogDebug("OOOOOO");
+
+				if (wall.wallType == WallType::WallStatic || wall.wallType == WallType::WallArena)
 				{
-					//core::LogDebug("Wall type is static");
 					continue;
 				}
 
-				wallEntity.velocity += core::Vec2f(0.0f, game::gravity /** (static_cast<float>(wall.wallType) / 100.0f) * wallSpeedRatio(wallEntity.position.y)*/);
-				physicsManager_.SetBody(entity, wallEntity);
+
+				/*if (!wall.isOnGround)
+				{*/
+					if (wallBody.velocity.y == 0.0f && (!(wall.wallType == WallType::WallStatic) || !(wall.wallType == WallType::WallArena)))
+					{
+						wall.isOnGround = wall.hasCollided;
+						wall.hasCollided = true;
+					}
+					wallBody.velocity += core::Vec2f(0.0f, game::gravity * (static_cast<float>(wall.wallType) / 100.0f) * wallSpeedRatio(wallBody.position.y)) * dt.asSeconds();
+				/*}*/
+
+				physicsManager_.SetBody(entity, wallBody);
 
 			}
 		}

@@ -30,6 +30,7 @@ public:
     virtual ~GameManager() = default;
     virtual void SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position);
     virtual core::Entity SpawnBullet(PlayerNumber, core::Vec2f position, core::Vec2f velocity);
+    virtual core::Entity SpawnWall(PlayerNumber, core::Vec2f position);
     virtual void DestroyBullet(core::Entity entity);
     [[nodiscard]] core::Entity GetEntityFromPlayerNumber(PlayerNumber playerNumber) const;
     [[nodiscard]] Frame GetCurrentFrame() const { return currentFrame_; }
@@ -83,6 +84,7 @@ public:
      */
     void SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position) override;
     core::Entity SpawnBullet(PlayerNumber playerNumber, core::Vec2f position, core::Vec2f velocity) override;
+    core::Entity SpawnWall(PlayerNumber playerNumber, core::Vec2f position) override;
     void FixedUpdate();
     void SetPlayerInput(PlayerNumber playerNumber, PlayerInput playerInput, std::uint32_t inputFrame) override;
     void DrawImGui() override;

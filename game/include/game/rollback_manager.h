@@ -4,6 +4,7 @@
 #include "physics_manager.h"
 #include "player_character.h"
 #include "wall_manager.h"
+#include "wallspawner_manager.h"
 #include "engine/entity.h"
 #include "engine/transform.h"
 #include "network/packet_type.h"
@@ -69,6 +70,7 @@ public:
     void SpawnArena(core::Entity, int i);
     void SpawnPlayer(PlayerNumber playerNumber, core::Entity entity, core::Vec2f position);
     void SpawnBullet(PlayerNumber playerNumber, core::Entity entity, core::Vec2f position, core::Vec2f velocity);
+    void SpawnWall(core::Entity entity, core::Vec2f position);
     /**
      * \brief DestroyEntity is a method that does not destroy the entity definitely, but puts the DESTROY flag on.
      * An entity is truly destroyed when the destroy frame is validated.
@@ -96,6 +98,7 @@ private:
     PlayerCharacterManager currentPlayerManager_;
     BulletManager currentBulletManager_;
     WallManager currentWallManager_;
+    WallSpawnerManager currentWallSpawnerManager_;
     /**
      * Last Validate (confirm frame) Component Managers used for rollback
      */
@@ -103,7 +106,7 @@ private:
     PlayerCharacterManager lastValidatePlayerManager_;
     BulletManager lastValidateBulletManager_;
     WallManager lastValidateWallManager_;
-
+    WallSpawnerManager lastValidateWallSpawnerManager_;
     /**
      * \brief lastValidateFrame_ is the last validated frame from the server side.
      */

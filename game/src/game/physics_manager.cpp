@@ -80,7 +80,7 @@ namespace game
 					}
 					else
 					{
-						CollisionResponse(body1, box1, body2, box2, dt);
+						CollisionResponse(body1, box1, body2, box2);
 						box1.hasCollided = true;
 
 					}
@@ -91,7 +91,7 @@ namespace game
 	}
 
 	void game::PhysicsManager::CollisionResponse(RigidBody& body, const Box& box, RigidBody& otherBody,
-		const Box& otherBox, const sf::Time dt) const
+		const Box& otherBox) const
 	{
 		const auto bod1Max = core::Vec2f(body.position.x + box.extends.x, body.position.y + box.extends.y);
 		const auto bod1Min = core::Vec2f(body.position.x - box.extends.x, body.position.y - box.extends.y);
@@ -104,7 +104,6 @@ namespace game
 
 
 		float mtvX = bod1Max.x - bod2Min.x;
-		auto sign = mtvX > 0 ? 1.0f : -1.0f;
 		mtvX = mtvX > bod2Max.x - bod1Min.x ? bod1Min.x - bod2Max.x : mtvX;
 
 		float mtvY = bod1Max.y - bod2Min.y;
@@ -140,6 +139,14 @@ namespace game
 
 			}
 			if (box2IsDynamic && !box1IsDynamic)
+			{
+				otherBody.position.y += mtvY;
+				if (otherBody.velocity.y < 0.0f)
+				{
+					otherBody.velocity.y = 0.0f;
+				}
+			}
+			if(!box1IsDynamic && !box2IsDynamic)
 			{
 				otherBody.position.y += mtvY;
 				if (otherBody.velocity.y < 0.0f)
@@ -203,7 +210,7 @@ namespace game
 				entityManager_.HasComponent(entity, static_cast<core::EntityMask>(ComponentType::DESTROYED)))
 				continue;
 			const auto& extends = boxManager_.GetComponent(entity).extends;
-			const auto& isTrigger = boxManager_.GetComponent(entity).isTrigger;
+			//const auto& isTrigger = boxManager_.GetComponent(entity).isTrigger;
 			const auto& body = bodyManager_.GetComponent(entity);
 			sf::RectangleShape rectShape;
 			rectShape.setFillColor(core::Color::transparent());

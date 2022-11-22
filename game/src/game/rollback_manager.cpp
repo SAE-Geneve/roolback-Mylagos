@@ -15,11 +15,17 @@ namespace game
 	RollbackManager::RollbackManager(GameManager& gameManager, core::EntityManager& entityManager) :
 		gameManager_(gameManager), entityManager_(entityManager),
 		currentTransformManager_(entityManager),
-		currentPhysicsManager_(entityManager), currentPlayerManager_(entityManager, currentPhysicsManager_, gameManager_),
-		currentBulletManager_(entityManager, gameManager), currentWallManager_(entityManager, currentPhysicsManager_, gameManager_),
+		currentPhysicsManager_(entityManager),
+		currentPlayerManager_(entityManager, currentPhysicsManager_, gameManager_, currentWallSpawnerManager_),
+		currentBulletManager_(entityManager, gameManager),
+		currentWallManager_(entityManager, currentPhysicsManager_, gameManager_),
+		currentWallSpawnerManager_(entityManager, currentPhysicsManager_, gameManager_),
 		lastValidatePhysicsManager_(entityManager),
-		lastValidatePlayerManager_(entityManager, lastValidatePhysicsManager_, gameManager_), lastValidateBulletManager_(entityManager, gameManager),
-		lastValidateWallManager_(entityManager, lastValidatePhysicsManager_, gameManager_)
+		lastValidatePlayerManager_(entityManager, 
+		lastValidatePhysicsManager_, gameManager_, lastValidateWallSpawnerManager_),
+		lastValidateBulletManager_(entityManager, gameManager),
+		lastValidateWallManager_(entityManager, lastValidatePhysicsManager_, gameManager_),
+		lastValidateWallSpawnerManager_(entityManager, lastValidatePhysicsManager_, gameManager_)
 	{
 		for (auto& input : inputs_)
 		{
@@ -184,6 +190,7 @@ namespace game
 		currentPhysicsManager_.CopyAllComponents(lastValidatePhysicsManager_);
 		currentPlayerManager_.CopyAllComponents(lastValidatePlayerManager_.GetAllComponents());
 		currentWallManager_.CopyAllComponents(lastValidateWallManager_.GetAllComponents());
+		currentWallSpawnerManager_.CopyAllComponents(lastValidateWallSpawnerManager_.GetAllComponents());
 
 		//We simulate the frames until the new validated frame
 		for (Frame frame = lastValidateFrame_ + 1; frame <= newValidateFrame; frame++)
@@ -203,6 +210,7 @@ namespace game
 			currentPlayerManager_.FixedUpdate(sf::seconds(fixedPeriod));
 			currentPhysicsManager_.FixedUpdate(sf::seconds(fixedPeriod));
 			currentWallManager_.FixedUpdate(sf::seconds(fixedPeriod));
+			currentWallSpawnerManager_.FixedUpdate(sf::seconds(fixedPeriod));
 		}
 		//Definitely remove DESTROY entities
 		for (core::Entity entity = 0; entity < entityManager_.GetEntitiesSize(); entity++)
@@ -217,6 +225,7 @@ namespace game
 		lastValidatePlayerManager_.CopyAllComponents(currentPlayerManager_.GetAllComponents());
 		lastValidatePhysicsManager_.CopyAllComponents(currentPhysicsManager_);
 		lastValidateWallManager_.CopyAllComponents(currentWallManager_.GetAllComponents());
+		lastValidateWallSpawnerManager_.CopyAllComponents(currentWallSpawnerManager_.GetAllComponents());
 		lastValidateFrame_ = newValidateFrame;
 		createdEntities_.clear();
 	}
@@ -272,6 +281,8 @@ namespace game
 		Box box;
 		Wall wall;
 		auto pos = core::Vec2f::one();
+		wall.wallType = WallType::WallStatic;
+
 		if (i == 0)
 		{
 			body.position = core::Vec2f(1.0f, -3.0f - 0.5f);
@@ -288,21 +299,25 @@ namespace game
 		}
 		else if (i == 3)
 		{
-			body.position = core::Vec2f(1.0f, -3.0f);
+			body.position = core::Vec2f(1.0f, -1.5f);
 			box.extends = core::Vec2f(0.25f, 0.25f);
+			wall.isOnGround = false;
 			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
+			wall.wallType = WallType::WallDouble;
 		}
 		else if (i == 4)
 		{
 			body.position = core::Vec2f(-1.0f, 0.5f);
 			box.extends = core::Vec2f(0.25f, 0.25f);
 			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
+			wall.wallType = WallType::WallDouble;
 		}
 		else if (i == 5)
 		{
 			body.position = core::Vec2f(1.0f, 1.5f);
 			box.extends = core::Vec2f(0.25f, 0.25f);
 			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
+			wall.wallType = WallType::WallDouble;
 		}
 		else
 		{
@@ -311,16 +326,12 @@ namespace game
 			pos = core::Vec2f((3.0f) * (1.0f - 2.0f * static_cast<float>(i % 2)), 1.0f);
 		}
 
-		wall.wallType = WallType::WallDouble;
-		wall.remainingTime = 500.0f;
-		box.collisionType = CollisionType::STATIC;
-		box.layer = CollisionLayer::WALL;
-		box.collideWithSame = false;
 
-		wall.wallType = WallType::WallDouble;
+		box.layer = CollisionLayer::WALL;
+		box.collideWithSame = true;
+
 		wall.remainingTime = 500.0f;
-		currentWallManager_.AddComponent(entity);
-		currentWallManager_.SetComponent(entity, wall);
+		
 
 		currentPhysicsManager_.AddBody(entity);
 		currentPhysicsManager_.SetBody(entity, body);
@@ -331,10 +342,16 @@ namespace game
 		lastValidatePhysicsManager_.SetBody(entity, body);
 		lastValidatePhysicsManager_.AddBox(entity);
 		lastValidatePhysicsManager_.SetBox(entity, box);
+		
 
 		currentTransformManager_.AddComponent(entity);
 		currentTransformManager_.SetPosition(entity, pos);
 		currentTransformManager_.SetScale(entity, core::Vec2f::one());
+
+		currentWallManager_.AddComponent(entity);
+		currentWallManager_.SetComponent(entity, wall);
+		lastValidateWallManager_.AddComponent(entity);
+		lastValidateWallManager_.SetComponent(entity, wall);
 	}
 
 
@@ -350,9 +367,16 @@ namespace game
 		playerBox.extends = core::Vec2f::one() * 0.25f;
 		playerBox.layer = CollisionLayer::PLAYER;
 		playerBox.collideWithSame = true;
+		WallSpawner playerSpawner;
+		playerSpawner.playerNumber = playerNumber;
 
 		PlayerCharacter playerCharacter;
 		playerCharacter.playerNumber = playerNumber;
+
+		currentWallSpawnerManager_.AddComponent(entity);
+		currentWallSpawnerManager_.SetComponent(entity, playerSpawner);
+		lastValidateWallSpawnerManager_.AddComponent(entity);
+		lastValidateWallSpawnerManager_.SetComponent(entity, playerSpawner);
 
 		currentPlayerManager_.AddComponent(entity);
 		currentPlayerManager_.SetComponent(entity, playerCharacter);
@@ -443,6 +467,42 @@ namespace game
 		currentTransformManager_.SetPosition(entity, position);
 		currentTransformManager_.SetScale(entity, core::Vec2f::one() * bulletScale);
 		currentTransformManager_.SetRotation(entity, core::Degree(0.0f));
+	}
+
+	void RollbackManager::SpawnWall(core::Entity entity, core::Vec2f position)
+	{
+		createdEntities_.push_back({ entity, testedFrame_ });
+
+		Wall wall;
+
+		RigidBody wallBody;
+		wallBody.position = position;
+		Box wallBox;
+		//TODO add wall length when on it
+		wallBox.extends = core::Vec2f::one() * game::wallSize;
+
+		wall.wallType = WallType::WallDouble;
+		wallBox.collisionType = CollisionType::STATIC;
+		wallBox.collideWithSame = true;
+
+		currentWallManager_.AddComponent(entity);
+		currentWallManager_.SetComponent(entity, wall);
+
+		currentPhysicsManager_.AddBody(entity);
+		currentPhysicsManager_.SetBody(entity, wallBody);
+		currentPhysicsManager_.AddBox(entity);
+		currentPhysicsManager_.SetBox(entity, wallBox);
+
+		currentTransformManager_.AddComponent(entity);
+		currentTransformManager_.SetPosition(entity, position);
+		//TODO add wall length when on it
+		currentTransformManager_.SetScale(entity, core::Vec2f(game::wallSize, game::wallSize));
+		currentTransformManager_.SetRotation(entity, core::Degree(0.0f));
+
+		currentWallManager_.AddComponent(entity);
+		currentWallManager_.SetComponent(entity, wall);
+		lastValidateWallManager_.AddComponent(entity);
+		lastValidateWallManager_.SetComponent(entity, wall);
 	}
 
 	void RollbackManager::DestroyEntity(core::Entity entity)
