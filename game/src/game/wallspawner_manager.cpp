@@ -19,18 +19,17 @@ namespace game
 	{
 		for (core::Entity entity = 0; entity < entityManager_.GetEntitiesSize(); entity++)
 		{
-			if (entityManager_.HasComponent(entity, static_cast<core::EntityMask>(ComponentType::WALLSPAWNER)))
+			if (entityManager_.HasComponent(entity, static_cast<core::EntityMask>(ComponentType::WALLSPAWNER)) && entityManager_.HasComponent(entity, static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)))
 			{
 				auto& spawner = components_[entity];
 
-				core::LogDebug("ooo");
 				auto spawnerBody = physicsManager_.GetBody(entity);
-				spawnerBody.velocity.y += 5 * dt.asSeconds();
-				if (spawner.i == 0)
-				{
-					spawner.i++;
-					spawnerBody.position = (core::Vec2f(0.0f, 0.0f));
-				}
+				spawnerBody.velocity.x += (5+spawner.verticalVelocity) * dt.asSeconds();
+				
+
+					//spawnerBody.position = (core::Vec2f(0.0f, 0.0f));
+				float ooo = dt.asSeconds();
+					ooo++;
 
 				physicsManager_.SetBody(entity, spawnerBody);
 			}

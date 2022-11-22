@@ -46,12 +46,14 @@ void GameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position)
     const auto entity = entityManager_.CreateEntity();
     playerEntityMap_[playerNumber] = entity;
 
-    
+    const auto spawnerEntity = entityManager_.CreateEntity();
+    transformManager_.AddComponent(spawnerEntity);
+
 
     transformManager_.AddComponent(entity);
     transformManager_.SetPosition(entity, position);
     
-    rollbackManager_.SpawnPlayer(playerNumber, entity, position);
+    rollbackManager_.SpawnPlayer(playerNumber, entity, spawnerEntity, position);
 }
 
 core::Entity GameManager::GetEntityFromPlayerNumber(PlayerNumber playerNumber) const
@@ -354,6 +356,8 @@ void ClientGameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f posit
     spriteManager_.SetOrigin(entity, sf::Vector2f(shipTexture_.getSize()) / 2.0f);
     spriteManager_.SetColor(entity, playerColors[playerNumber]);
 
+    const core::Entity entity2{};
+
 }
 
 core::Entity ClientGameManager::SpawnBullet(PlayerNumber playerNumber, core::Vec2f position, core::Vec2f velocity)
@@ -370,10 +374,11 @@ core::Entity ClientGameManager::SpawnBullet(PlayerNumber playerNumber, core::Vec
 
 core::Entity game::ClientGameManager::SpawnWall(PlayerNumber playerNumber, core::Vec2f position)
 {
+    core::LogDebug("Spawn wall");
     const auto entity = GameManager::SpawnWall(playerNumber, position);
-
+    
     spriteManager_.AddComponent(entity);
-    spriteManager_.SetTexture(entity, bulletTexture_);
+    //spriteManager_.SetTexture(entity, bulletTexture_);
     spriteManager_.SetOrigin(entity, sf::Vector2f(bulletTexture_.getSize()) / 2.0f);
     spriteManager_.SetColor(entity, playerColors[playerNumber]);
 

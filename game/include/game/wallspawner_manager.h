@@ -10,7 +10,7 @@ namespace game
 	 */
 	struct WallSpawner
 	{
-		
+		float verticalVelocity = 0;
 		PlayerNumber playerNumber = INVALID_PLAYER;
 		core::Vec2f initialPosition{};
 		core::Vec2f finalPosition{};

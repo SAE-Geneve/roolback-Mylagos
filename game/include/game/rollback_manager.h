@@ -68,7 +68,7 @@ public:
     [[nodiscard]] const core::TransformManager& GetTransformManager() const { return currentTransformManager_; }
     [[nodiscard]] const PlayerCharacterManager& GetPlayerCharacterManager() const { return currentPlayerManager_; }
     void SpawnArena(core::Entity, int i);
-    void SpawnPlayer(PlayerNumber playerNumber, core::Entity entity, core::Vec2f position);
+    void SpawnPlayer(PlayerNumber playerNumber, core::Entity entity, core::Entity spawnerEntity, core::Vec2f position);
     void SpawnBullet(PlayerNumber playerNumber, core::Entity entity, core::Vec2f position, core::Vec2f velocity);
     void SpawnWall(core::Entity entity, core::Vec2f position);
     /**

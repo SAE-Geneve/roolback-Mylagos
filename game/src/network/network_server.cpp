@@ -244,6 +244,7 @@ void NetworkServer::ProcessReceivePacket(
         else
         {
             gpr_assert(false, "Player Number is supposed to be already set before join!");
+            return;
         }
 
         auto joinAckPacket = std::make_unique<JoinAckPacket>();

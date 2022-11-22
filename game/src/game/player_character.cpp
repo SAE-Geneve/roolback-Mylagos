@@ -45,7 +45,7 @@ namespace game
 
 			if (up && playerCharacter.isOnGround)
 			{
-				playerCharacter.jumpBuffer ++;
+				playerCharacter.jumpBuffer++;
 				if (playerCharacter.jumpBuffer == 1)
 				{
 					core::LogDebug("eee");
@@ -72,7 +72,7 @@ namespace game
 					playerCharacter.isOnGround = true;
 				}
 			}
-			
+
 			if (!playerCharacter.isOnGround || playerCharacter.jumpBuffer != 0)
 			{
 				if (playerBody.velocity.y > 1.0f)
@@ -102,28 +102,32 @@ namespace game
 			//core::LogDebug(fmt::format("Player's acceleration is x("  + std::to_string(playerBody.velocity.x) + ") : y(" + std::to_string(playerBody.velocity.y) + ")\n"));
 
 
-		
-				if (input & PlayerInputEnum::PlayerInput::BUILD)
-				{
-					if(!playerCharacter.isbuilding)
-					{
-						const auto tempVec = static_cast<sf::Vector2f>(sf::Mouse::getPosition());
-						core::Vec2f mouse = tempVec;
 
-						
-						playerCharacter.isbuilding = true;
-					}
-
-				}
-				else
+			if (input & PlayerInputEnum::PlayerInput::BUILD)
+			{
+				if (!playerCharacter.isbuilding)
 				{
-					if(playerCharacter.isbuilding)
-					{
-						gameManager_.SpawnWall(playerCharacter.playerNumber, playerCharacter.wallSpawnPosition);
-						playerCharacter.isbuilding = false;
-					}
+					const auto tempVec = static_cast<sf::Vector2f>(sf::Mouse::getPosition());
+					core::Vec2f mouse = tempVec;
+
+
+					playerCharacter.isbuilding = true;
 				}
-			
+
+			}
+			else
+			{
+				if (playerCharacter.isbuilding)
+				{
+					gameManager_.SpawnWall(playerCharacter.playerNumber, playerCharacter.wallSpawnPosition);
+					playerCharacter.isbuilding = false;
+				}
+			}
+
+			auto spawner = wallSpawnerManager_.GetComponent(playerEntity);
+			spawner.verticalVelocity = -5.0f;
+			//core::LogDebug(std::to_string(spawner.verticalVelocity));
+			wallSpawnerManager_.SetComponent(playerEntity, spawner);
 
 			physicsManager_.SetBox(playerEntity, playerBox);
 			physicsManager_.SetBody(playerEntity, playerBody);

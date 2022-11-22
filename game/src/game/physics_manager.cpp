@@ -93,6 +93,11 @@ namespace game
 	void game::PhysicsManager::CollisionResponse(RigidBody& body, const Box& box, RigidBody& otherBody,
 		const Box& otherBox) const
 	{
+		if(box.collisionType == CollisionType::NONE || otherBox.collisionType == CollisionType::NONE)
+		{
+			return;
+		}
+
 		const auto bod1Max = core::Vec2f(body.position.x + box.extends.x, body.position.y + box.extends.y);
 		const auto bod1Min = core::Vec2f(body.position.x - box.extends.x, body.position.y - box.extends.y);
 

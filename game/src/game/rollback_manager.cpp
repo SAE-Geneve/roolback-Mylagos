@@ -329,7 +329,7 @@ namespace game
 
 		box.layer = CollisionLayer::WALL;
 		box.collideWithSame = true;
-
+		box.collisionType = CollisionType::STATIC;
 		wall.remainingTime = 500.0f;
 		
 
@@ -355,20 +355,51 @@ namespace game
 	}
 
 
-	void RollbackManager::SpawnPlayer(PlayerNumber playerNumber, core::Entity entity, core::Vec2f position)
+	void RollbackManager::SpawnPlayer(PlayerNumber playerNumber, core::Entity entity, core::Entity spawnerEntity, core::Vec2f position)
 	{
 
 #ifdef TRACY_ENABLE
 		ZoneScoped;
 #endif
+		WallSpawner playerSpawner;
+		playerSpawner.playerNumber = playerNumber;
+
+		RigidBody spawnerBody;
+		spawnerBody.position = position;
+		Box spawnerBox;
+		spawnerBox.extends = core::Vec2f::one() * 0.25f;
+		spawnerBox.layer = CollisionLayer::NONE;
+		spawnerBox.collideWithSame = false;
+
+		spawnerBox.collisionType = CollisionType::NONE;
+
+		currentWallSpawnerManager_.AddComponent(spawnerEntity);
+		currentWallSpawnerManager_.SetComponent(spawnerEntity, playerSpawner);
+		lastValidateWallSpawnerManager_.AddComponent(spawnerEntity);
+		lastValidateWallSpawnerManager_.SetComponent(spawnerEntity, playerSpawner);
+
+		currentPhysicsManager_.AddBody(spawnerEntity);
+		currentPhysicsManager_.SetBody(spawnerEntity, spawnerBody);
+		currentPhysicsManager_.AddBox(spawnerEntity);
+		currentPhysicsManager_.SetBox(spawnerEntity, spawnerBox);
+
+		lastValidatePhysicsManager_.AddBody(spawnerEntity);
+		lastValidatePhysicsManager_.SetBody(spawnerEntity, spawnerBody);
+		lastValidatePhysicsManager_.AddBox(spawnerEntity);
+		lastValidatePhysicsManager_.SetBox(spawnerEntity, spawnerBox);
+
+		currentTransformManager_.AddComponent(spawnerEntity);
+		currentTransformManager_.SetPosition(spawnerEntity, position);
+		currentTransformManager_.SetRotation(spawnerEntity, core::Degree(45.0f));
+
 		RigidBody playerBody;
 		playerBody.position = position;
 		Box playerBox;
 		playerBox.extends = core::Vec2f::one() * 0.25f;
 		playerBox.layer = CollisionLayer::PLAYER;
 		playerBox.collideWithSame = true;
-		WallSpawner playerSpawner;
-		playerSpawner.playerNumber = playerNumber;
+		playerBox.collisionType = CollisionType::DYNAMIC;
+		
 
 		PlayerCharacter playerCharacter;
 		playerCharacter.playerNumber = playerNumber;
