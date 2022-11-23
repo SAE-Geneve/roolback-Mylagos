@@ -21,6 +21,8 @@ void Client::ReceivePacket(const Packet* packet)
     {
     case PacketType::SPAWN_PLAYER:
     {
+        
+
         const auto* spawnPlayerPacket = static_cast<const SpawnPlayerPacket*>(packet);
         const auto clientId = core::ConvertFromBinary<ClientId>(spawnPlayerPacket->clientId);
 
@@ -154,7 +156,6 @@ void Client::ReceivePacket(const Packet* packet)
 
 void Client::Update(sf::Time dt)
 {
-
 #ifdef TRACY_ENABLE
     ZoneScoped;
 #endif

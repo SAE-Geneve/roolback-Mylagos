@@ -72,10 +72,10 @@ namespace game
 
 	constexpr std::array<core::Color, std::max(4u, maxPlayerNmb)> playerColors
 	{
-		core::Color::red(),
-		core::Color::blue(),
+		core::Color::cyan(),
+		core::Color::orange(),
 		core::Color::yellow(),
-		core::Color::cyan()
+		core::Color::blue()
 	};
 
 	constexpr std::array<core::Vec2f, std::max(4u, maxPlayerNmb)> spawnPositions

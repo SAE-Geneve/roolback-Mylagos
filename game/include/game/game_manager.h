@@ -28,7 +28,7 @@ class GameManager
 public:
     GameManager();
     virtual ~GameManager() = default;
-    virtual void SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position);
+    virtual std::pair<core::Entity, core::Entity> SpawnFullPlayer(PlayerNumber playerNumber, core::Vec2f position);
     virtual core::Entity SpawnBullet(PlayerNumber, core::Vec2f position, core::Vec2f velocity);
     virtual core::Entity SpawnWall(PlayerNumber, core::Vec2f position);
     virtual void DestroyBullet(core::Entity entity);
@@ -82,7 +82,8 @@ public:
      * \param position is where the player character will be spawned
      * \param rotation is the spawning angle of the player character 
      */
-    void SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position) override;
+    void DrawArena();
+    void SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position);
     core::Entity SpawnBullet(PlayerNumber playerNumber, core::Vec2f position, core::Vec2f velocity) override;
     core::Entity SpawnWall(PlayerNumber playerNumber, core::Vec2f position) override;
     void FixedUpdate();
@@ -109,6 +110,9 @@ protected:
 
     sf::Texture shipTexture_;
     sf::Texture bulletTexture_;
+    sf::Texture wallTexture_;
+    sf::Texture wallSpawnerTexture_;
+    sf::Texture backgroundTexture_;
     sf::Font font_;
 
     sf::Text textRenderer_;

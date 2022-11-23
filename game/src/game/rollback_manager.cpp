@@ -1,4 +1,3 @@
-#include <iostream>
 #include <game/rollback_manager.h>
 #include <game/game_manager.h>
 #include "utils/assert.h"
@@ -366,6 +365,7 @@ namespace game
 		lastValidatePhysicsManager_.SetBox(spawnerEntity, spawnerBox);
 
 		currentTransformManager_.AddComponent(spawnerEntity);
+		currentTransformManager_.SetScale(spawnerEntity, core::Vec2f::one() * 1.5f);
 		currentTransformManager_.SetPosition(spawnerEntity, core::Vec2f(0, game::spawnerHeight));
 
 		RigidBody playerBody;
@@ -527,9 +527,7 @@ namespace game
 
 		currentTransformManager_.AddComponent(entity);
 		currentTransformManager_.SetPosition(entity, position);
-		//TODO add wall length when on it
-		currentTransformManager_.SetScale(entity, core::Vec2f(game::wallSize, game::wallSize));
-		currentTransformManager_.SetRotation(entity, core::Degree(0.0f));
+		currentTransformManager_.SetScale(entity, core::Vec2f::one()*1.5f);
 
 		currentWallManager_.AddComponent(entity);
 		currentWallManager_.SetComponent(entity, wall);

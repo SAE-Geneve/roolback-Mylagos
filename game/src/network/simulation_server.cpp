@@ -127,7 +127,7 @@ void SimulationServer::SpawnNewPlayer(ClientId clientId, PlayerNumber playerNumb
 
     const auto pos = spawnPositions[playerNumber] * 3.0f;
     spawnPlayer->pos = ConvertToBinary(pos);
-    gameManager_.SpawnPlayer(playerNumber, pos);
+    gameManager_.SpawnFullPlayer(playerNumber, pos);
     SendReliablePacket(std::move(spawnPlayer));
 }
 }

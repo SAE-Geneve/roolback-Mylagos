@@ -9,7 +9,7 @@
 #include <fmt/format.h>
 #include <imgui.h>
 #include <chrono>
-#include <iostream>
+
 
 
 #ifdef TRACY_ENABLE
@@ -26,7 +26,7 @@ GameManager::GameManager() :
     playerEntityMap_.fill(core::INVALID_ENTITY);
 
     // 1 for floor 2/3 for walls, 4 for mtv test
-    for (int i = 0; i<7; i++)
+    for (int i = 0; i<3; i++)
     {
 	    const auto entity = entityManager_.CreateEntity();
 
@@ -38,10 +38,12 @@ GameManager::GameManager() :
     }
 }
 
-void GameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position)
+
+
+std::pair<core::Entity, core::Entity> GameManager::SpawnFullPlayer(PlayerNumber playerNumber, core::Vec2f position)
 {
     if (GetEntityFromPlayerNumber(playerNumber) != core::INVALID_ENTITY)
-        return;
+        exit(0);
     core::LogDebug("[GameManager] Spawning new player");
     const auto entity = entityManager_.CreateEntity();
     playerEntityMap_[playerNumber] = entity;
@@ -54,7 +56,7 @@ void GameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position)
     transformManager_.SetPosition(entity, position);
     
     rollbackManager_.SpawnPlayer(playerNumber, entity, spawnerEntity, position);
-    // TODO : Return l'entité du spawner ici
+    return std::make_pair(entity, spawnerEntity);
 }
 
 core::Entity GameManager::GetEntityFromPlayerNumber(PlayerNumber playerNumber) const
@@ -102,7 +104,7 @@ core::Entity GameManager::SpawnWall(PlayerNumber, core::Vec2f position)
 
     transformManager_.AddComponent(entity);
     transformManager_.SetPosition(entity, position);
-    transformManager_.SetScale(entity, core::Vec2f::one() * game::wallSize);
+    transformManager_.SetScale(entity, core::Vec2f(20, 20));
     transformManager_.SetRotation(entity, core::Degree(0.0f));
     rollbackManager_.SpawnWall(entity, position);
     return entity;
@@ -158,6 +160,18 @@ void ClientGameManager::Begin()
     if (!shipTexture_.loadFromFile("data/sprites/ship.png"))
     {
         core::LogError("Could not load ship sprite");
+    }
+    if (!wallTexture_.loadFromFile("data/sprites/wall.png"))
+    {
+        core::LogError("Could not load wall sprite");
+    }
+    if (!wallSpawnerTexture_.loadFromFile("data/sprites/wallSpawner.png"))
+    {
+        core::LogError("Could not load wallspawner sprite");
+    }
+    if (!wallSpawnerTexture_.loadFromFile("data/sprites/background.png"))
+    {
+        core::LogError("Could not load background sprite");
     }
     //load fonts
     if (!font_.loadFromFile("data/fonts/8-bit-hud.ttf"))
@@ -228,6 +242,8 @@ void ClientGameManager::SetWindowSize(sf::Vector2u windowsSize)
     auto& currentPhysicsManager = rollbackManager_.GetCurrentPhysicsManager();
     currentPhysicsManager.SetCenter(sf::Vector2f(windowsSize) / 2.0f);
     currentPhysicsManager.SetWindowSize(sf::Vector2f(windowsSize));
+
+
 }
 
 void ClientGameManager::Draw(sf::RenderTarget& target)
@@ -334,27 +350,44 @@ void ClientGameManager::SetClientPlayer(PlayerNumber clientPlayer)
     clientPlayer_ = clientPlayer;
 }
 
+void game::ClientGameManager::DrawArena()
+{
+	const core::Entity wall = entityManager_.CreateEntity();
+
+    transformManager_.AddComponent(wall);
+    transformManager_.SetScale(wall, core::Vec2f::one() * 4);
+
+    spriteManager_.AddComponent(wall);
+    spriteManager_.SetTexture(wall, shipTexture_);
+    spriteManager_.SetOrigin(wall, sf::Vector2f(shipTexture_.getSize()) / 2.0f);
+}
+
 void ClientGameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position)
 {
     core::LogDebug(fmt::format("Spawn player: {}", playerNumber));
 
-    // TODO : Chopper l'id du spawner ici et ajouter le rectangle shape component
-    GameManager::SpawnPlayer(playerNumber, position);
-    const auto entity = GetEntityFromPlayerNumber(playerNumber);
+    auto pair = SpawnFullPlayer(playerNumber, position);
+    const auto entity = pair.first;
+    
     spriteManager_.AddComponent(entity);
     spriteManager_.SetTexture(entity, shipTexture_);
     spriteManager_.SetOrigin(entity, sf::Vector2f(shipTexture_.getSize()) / 2.0f);
     spriteManager_.SetColor(entity, playerColors[playerNumber]);
 
-    const core::Entity entity2{};
-
+    const auto otherEntity = pair.second;
+    spriteManager_.AddComponent(otherEntity);
+    spriteManager_.SetTexture(otherEntity, wallSpawnerTexture_);
+    spriteManager_.SetOrigin(otherEntity, sf::Vector2f(wallSpawnerTexture_.getSize()) / 2.0f);
+    spriteManager_.SetColor(otherEntity, playerColors[playerNumber]);
 }
 
 core::Entity ClientGameManager::SpawnBullet(PlayerNumber playerNumber, core::Vec2f position, core::Vec2f velocity)
 {
+
     const auto entity = GameManager::SpawnBullet(playerNumber, position, velocity);
 
     spriteManager_.AddComponent(entity);
+    
     spriteManager_.SetTexture(entity, bulletTexture_);
     spriteManager_.SetOrigin(entity, sf::Vector2f(bulletTexture_.getSize()) / 2.0f);
     spriteManager_.SetColor(entity, playerColors[playerNumber]);
@@ -364,14 +397,15 @@ core::Entity ClientGameManager::SpawnBullet(PlayerNumber playerNumber, core::Vec
 
 core::Entity game::ClientGameManager::SpawnWall(PlayerNumber playerNumber, core::Vec2f position)
 {
-    core::LogDebug("Spawn wall");
-    const auto entity = GameManager::SpawnWall(playerNumber, position);
+    core::LogDebug(fmt::format("Spawn wall from player: {}", playerNumber));
     
-    spriteManager_.AddComponent(entity);
-    //spriteManager_.SetTexture(entity, bulletTexture_);
-    spriteManager_.SetOrigin(entity, sf::Vector2f(bulletTexture_.getSize()) / 2.0f);
-    spriteManager_.SetColor(entity, playerColors[playerNumber]);
+    const auto entity = GameManager::SpawnWall(playerNumber, position);
 
+    spriteManager_.AddComponent(entity);
+    spriteManager_.SetTexture(entity, wallTexture_);
+    spriteManager_.SetOrigin(entity, sf::Vector2f(shipTexture_.getSize()) / 2.0f);
+    spriteManager_.SetColor(entity, playerColors[playerNumber]);
+    
 	return entity;
 }
 

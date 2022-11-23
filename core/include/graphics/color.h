@@ -28,6 +28,7 @@ struct Color
     static constexpr Color white() { return { 255u,255u,255u,255u }; }
     static constexpr Color magenta() { return { 255u,0u,255u,255u }; }
     static constexpr Color cyan() { return { 0u,255u,255u,255u }; }
+    static constexpr Color orange() { return { 255u,165u,0u,255u }; }
     static constexpr Color transparent() { return { 0u,0u,0u,0u }; }
 };
 
