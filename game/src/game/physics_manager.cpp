@@ -138,7 +138,6 @@ namespace game
 		}
 		else
 		{
-
 			if (box1IsDynamic && otherBox.collisionType == CollisionType::STATIC)
 			{
 				body.position.y -= mtvY;
@@ -146,7 +145,6 @@ namespace game
 				{
 					body.velocity.y = 0.0f;
 				}
-
 			}
 			if (box2IsDynamic && box.collisionType == CollisionType::STATIC)
 			{

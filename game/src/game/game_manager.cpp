@@ -86,18 +86,6 @@ void GameManager::Validate(Frame newValidateFrame)
     rollbackManager_.ValidateFrame(newValidateFrame);
 }
 
-core::Entity GameManager::SpawnBullet(PlayerNumber playerNumber, core::Vec2f position, core::Vec2f velocity)
-{
-    const core::Entity entity = entityManager_.CreateEntity();
-
-    transformManager_.AddComponent(entity);
-    transformManager_.SetPosition(entity, position);
-    transformManager_.SetScale(entity, core::Vec2f::one() * bulletScale);
-    transformManager_.SetRotation(entity, core::Degree(0.0f));
-    rollbackManager_.SpawnBullet(playerNumber, entity, position, velocity);
-    return entity;
-}
-
 core::Entity GameManager::SpawnWall(PlayerNumber, core::Vec2f position)
 {
     const core::Entity entity = entityManager_.CreateEntity();
@@ -108,11 +96,6 @@ core::Entity GameManager::SpawnWall(PlayerNumber, core::Vec2f position)
     transformManager_.SetRotation(entity, core::Degree(0.0f));
     rollbackManager_.SpawnWall(entity, position);
     return entity;
-}
-
-void GameManager::DestroyBullet(core::Entity entity)
-{
-    rollbackManager_.DestroyEntity(entity);
 }
 
 PlayerNumber GameManager::CheckWinner() const
@@ -153,10 +136,6 @@ void ClientGameManager::Begin()
     ZoneScoped;
 #endif
     //load textures
-    if (!bulletTexture_.loadFromFile("data/sprites/bullet.png"))
-    {
-        core::LogError("Could not load bullet sprite");
-    }
     if (!shipTexture_.loadFromFile("data/sprites/ship.png"))
     {
         core::LogError("Could not load ship sprite");
@@ -197,19 +176,6 @@ void ClientGameManager::Update(sf::Time dt)
             if (entityManager_.HasComponent(entity,
                 static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER) |
                 static_cast<core::EntityMask>(core::ComponentType::SPRITE)))
-            {
-                const auto& player = rollbackManager_.GetPlayerCharacterManager().GetComponent(entity);
-
-                if (player.invincibilityTime > 0.0f &&
-                    std::fmod(player.invincibilityTime, invincibilityFlashPeriod) > invincibilityFlashPeriod / 2.0f)
-                {
-                    spriteManager_.SetColor(entity, sf::Color::Black);
-                }
-                else
-                {
-                    spriteManager_.SetColor(entity, playerColors[player.playerNumber]);
-                }
-            }
 
             if (entityManager_.HasComponent(entity, static_cast<core::EntityMask>(core::ComponentType::TRANSFORM)))
             {
@@ -379,20 +345,6 @@ void ClientGameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f posit
     spriteManager_.SetTexture(otherEntity, wallSpawnerTexture_);
     spriteManager_.SetOrigin(otherEntity, sf::Vector2f(wallSpawnerTexture_.getSize()) / 2.0f);
     spriteManager_.SetColor(otherEntity, playerColors[playerNumber]);
-}
-
-core::Entity ClientGameManager::SpawnBullet(PlayerNumber playerNumber, core::Vec2f position, core::Vec2f velocity)
-{
-
-    const auto entity = GameManager::SpawnBullet(playerNumber, position, velocity);
-
-    spriteManager_.AddComponent(entity);
-    
-    spriteManager_.SetTexture(entity, bulletTexture_);
-    spriteManager_.SetOrigin(entity, sf::Vector2f(bulletTexture_.getSize()) / 2.0f);
-    spriteManager_.SetColor(entity, playerColors[playerNumber]);
-
-    return entity;
 }
 
 core::Entity game::ClientGameManager::SpawnWall(PlayerNumber playerNumber, core::Vec2f position)

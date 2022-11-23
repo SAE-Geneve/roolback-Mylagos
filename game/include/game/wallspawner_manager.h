@@ -17,11 +17,7 @@ namespace game
 		core::Entity playerEntity = core::INVALID_ENTITY;
 		float movementTimeLocker = 0.0f;
 		float buildTimeLocker = 0.0f;
-		float horizontalVelocity = 0;
 		PlayerNumber playerNumber = INVALID_PLAYER;
-		core::Vec2f initialPosition{};
-		core::Vec2f finalPosition{};
-		int i = 0;
 	};
 
 	/**

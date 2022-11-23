@@ -29,9 +29,7 @@ public:
     GameManager();
     virtual ~GameManager() = default;
     virtual std::pair<core::Entity, core::Entity> SpawnFullPlayer(PlayerNumber playerNumber, core::Vec2f position);
-    virtual core::Entity SpawnBullet(PlayerNumber, core::Vec2f position, core::Vec2f velocity);
     virtual core::Entity SpawnWall(PlayerNumber, core::Vec2f position);
-    virtual void DestroyBullet(core::Entity entity);
     [[nodiscard]] core::Entity GetEntityFromPlayerNumber(PlayerNumber playerNumber) const;
     [[nodiscard]] Frame GetCurrentFrame() const { return currentFrame_; }
     [[nodiscard]] Frame GetLastValidateFrame() const { return rollbackManager_.GetLastValidateFrame(); }
@@ -84,7 +82,6 @@ public:
      */
     void DrawArena();
     void SpawnPlayer(PlayerNumber playerNumber, core::Vec2f position);
-    core::Entity SpawnBullet(PlayerNumber playerNumber, core::Vec2f position, core::Vec2f velocity) override;
     core::Entity SpawnWall(PlayerNumber playerNumber, core::Vec2f position) override;
     void FixedUpdate();
     void SetPlayerInput(PlayerNumber playerNumber, PlayerInput playerInput, std::uint32_t inputFrame) override;
@@ -109,7 +106,6 @@ protected:
     std::uint32_t state_ = 0;
 
     sf::Texture shipTexture_;
-    sf::Texture bulletTexture_;
     sf::Texture wallTexture_;
     sf::Texture wallSpawnerTexture_;
     sf::Texture backgroundTexture_;

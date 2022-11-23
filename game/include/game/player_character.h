@@ -12,27 +12,15 @@ namespace game
 struct PlayerCharacter
 {
 
-    float shootingTime = 0.0f;
     PlayerInput input = 0u;
     PlayerNumber playerNumber = INVALID_PLAYER;
     short health = playerHealth;
-    float invincibilityTime = 0.0f;
     float acceleration = 0.0f;
     int jumpBuffer = 0;
     int jumpCooldownCount = 0;
     bool isOnGround = false;
 
     float summForceX = 0.0f;
-    float summForceY = 0.0f;
-
-    bool otherPlayerIsOnLeft = false;
-    bool otherPlayerIsOnRight = false;
-    float collisionAccelerationOverTime = 0.0f;
-
-    core::Vec2f wallSpawnPosition{};
-    bool isbuilding = false;
-    core::Vec2f windowSize_{};
-    core::Vec2f center_{};
 };
 
 class PhysicsManager;

@@ -32,6 +32,7 @@ namespace game
 			auto playerBox = physicsManager_.GetBox(playerEntity);
 			auto playerCharacter = GetComponent(playerEntity);
 
+			//Death animation kinda thing
 			if(playerCharacter.health == 0)
 			{
 				playerBox.disableCollisions = true;

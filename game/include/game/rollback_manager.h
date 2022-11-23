@@ -1,5 +1,4 @@
 #pragma once
-#include "bullet_manager.h"
 #include "game_globals.h"
 #include "physics_manager.h"
 #include "player_character.h"
@@ -96,7 +95,6 @@ private:
     core::TransformManager currentTransformManager_;
     PhysicsManager currentPhysicsManager_;
     PlayerCharacterManager currentPlayerManager_;
-    BulletManager currentBulletManager_;
     WallManager currentWallManager_;
     WallSpawnerManager currentWallSpawnerManager_;
     /**
@@ -104,7 +102,6 @@ private:
      */
     PhysicsManager lastValidatePhysicsManager_;
     PlayerCharacterManager lastValidatePlayerManager_;
-    BulletManager lastValidateBulletManager_;
     WallManager lastValidateWallManager_;
     WallSpawnerManager lastValidateWallSpawnerManager_;
     /**

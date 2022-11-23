@@ -16,12 +16,10 @@ namespace game
 		currentTransformManager_(entityManager),
 		currentPhysicsManager_(entityManager),
 		currentPlayerManager_(entityManager, currentPhysicsManager_, gameManager_),
-		currentBulletManager_(entityManager, gameManager),
 		currentWallManager_(entityManager, currentPhysicsManager_, gameManager_),
 		currentWallSpawnerManager_(entityManager, currentPhysicsManager_, gameManager_, currentPlayerManager_),
 		lastValidatePhysicsManager_(entityManager),
 		lastValidatePlayerManager_(entityManager, lastValidatePhysicsManager_, gameManager_),
-		lastValidateBulletManager_(entityManager, gameManager),
 		lastValidateWallManager_(entityManager, lastValidatePhysicsManager_, gameManager_),
 		lastValidateWallSpawnerManager_(entityManager, lastValidatePhysicsManager_, gameManager_, lastValidatePlayerManager_)
 	{
@@ -59,7 +57,6 @@ namespace game
 		}
 
 		//Revert the current game state to the last validated game state
-		currentBulletManager_.CopyAllComponents(lastValidateBulletManager_.GetAllComponents());
 		currentPhysicsManager_.CopyAllComponents(lastValidatePhysicsManager_);
 		currentWallManager_.CopyAllComponents(lastValidateWallManager_.GetAllComponents());
 		currentPlayerManager_.CopyAllComponents(lastValidatePlayerManager_.GetAllComponents());
@@ -82,7 +79,6 @@ namespace game
 				currentPlayerManager_.SetComponent(playerEntity, playerCharacter);
 			}
 			//Simulate one frame of the game
-			currentBulletManager_.FixedUpdate(sf::seconds(fixedPeriod));
 			currentPlayerManager_.FixedUpdate(sf::seconds(fixedPeriod));
 			currentPhysicsManager_.FixedUpdate(sf::seconds(fixedPeriod));
 			currentWallManager_.FixedUpdate(sf::seconds(fixedPeriod));
@@ -184,7 +180,6 @@ namespace game
 		createdEntities_.clear();
 
 		//We use the current game state as the temporary new validate game state
-		currentBulletManager_.CopyAllComponents(lastValidateBulletManager_.GetAllComponents());
 		currentPhysicsManager_.CopyAllComponents(lastValidatePhysicsManager_);
 		currentPlayerManager_.CopyAllComponents(lastValidatePlayerManager_.GetAllComponents());
 		currentWallManager_.CopyAllComponents(lastValidateWallManager_.GetAllComponents());
@@ -204,7 +199,6 @@ namespace game
 				currentPlayerManager_.SetComponent(playerEntity, playerCharacter);
 			}
 			//We simulate one frame
-			currentBulletManager_.FixedUpdate(sf::seconds(fixedPeriod));
 			currentPlayerManager_.FixedUpdate(sf::seconds(fixedPeriod));
 			currentPhysicsManager_.FixedUpdate(sf::seconds(fixedPeriod));
 			currentWallManager_.FixedUpdate(sf::seconds(fixedPeriod));
@@ -219,7 +213,6 @@ namespace game
 			}
 		}
 		//Copy back the new validate game state to the last validated game state
-		lastValidateBulletManager_.CopyAllComponents(currentBulletManager_.GetAllComponents());
 		lastValidatePlayerManager_.CopyAllComponents(currentPlayerManager_.GetAllComponents());
 		lastValidatePhysicsManager_.CopyAllComponents(currentPhysicsManager_);
 		lastValidateWallManager_.CopyAllComponents(currentWallManager_.GetAllComponents());
@@ -284,13 +277,6 @@ namespace game
 		if (i == 0)
 		{
 			body.position = core::Vec2f(1.0f, -3.0f - 0.5f);
-			box.extends = core::Vec2f(100.0f, 0.25f);
-			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
-
-		}
-		else if (i == 3)
-		{
-			body.position = core::Vec2f(1.0f, 3.5f);
 			box.extends = core::Vec2f(100.0f, 0.25f);
 			pos = core::Vec2f(1.0f, -3.0f - 0.5f);
 
@@ -440,64 +426,6 @@ namespace game
 			const auto& wall = currentWallManager_.GetComponent(entity1);
 			KillFunction(player, entity2, wall, entity1);
 		}
-
-
-		const std::function<void(const PlayerCharacter&, core::Entity, const Bullet&, core::Entity)> ManageCollision =
-			[this](const auto& player, auto playerEntity, const auto& bullet, auto bulletEntity)
-		{
-			if (player.playerNumber != bullet.playerNumber)
-			{
-				gameManager_.DestroyBullet(bulletEntity);
-				//lower health point
-				auto playerCharacter = currentPlayerManager_.GetComponent(playerEntity);
-				if (playerCharacter.invincibilityTime <= 0.0f)
-				{
-					core::LogDebug(fmt::format("Player {} is hit by bullet", playerCharacter.playerNumber));
-					--playerCharacter.health;
-					playerCharacter.invincibilityTime = playerInvincibilityPeriod;
-				}
-				currentPlayerManager_.SetComponent(playerEntity, playerCharacter);
-			}
-		};
-		if (entityManager_.HasComponent(entity1, static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)) &&
-			entityManager_.HasComponent(entity2, static_cast<core::EntityMask>(ComponentType::BULLET)))
-		{
-			const auto& player = currentPlayerManager_.GetComponent(entity1);
-			const auto& bullet = currentBulletManager_.GetComponent(entity2);
-			ManageCollision(player, entity1, bullet, entity2);
-
-		}
-		if (entityManager_.HasComponent(entity2, static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)) &&
-			entityManager_.HasComponent(entity1, static_cast<core::EntityMask>(ComponentType::BULLET)))
-		{
-			const auto& player = currentPlayerManager_.GetComponent(entity2);
-			const auto& bullet = currentBulletManager_.GetComponent(entity1);
-			ManageCollision(player, entity2, bullet, entity1);
-		}
-	}
-
-	void RollbackManager::SpawnBullet(PlayerNumber playerNumber, core::Entity entity, core::Vec2f position, core::Vec2f velocity)
-	{
-		createdEntities_.push_back({ entity, testedFrame_ });
-
-		RigidBody bulletBody;
-		bulletBody.position = position;
-		bulletBody.velocity = velocity;
-		Box bulletBox;
-		bulletBox.extends = core::Vec2f::one() * bulletScale * 0.5f;
-
-		currentBulletManager_.AddComponent(entity);
-		currentBulletManager_.SetComponent(entity, { bulletPeriod, playerNumber });
-
-		currentPhysicsManager_.AddBody(entity);
-		currentPhysicsManager_.SetBody(entity, bulletBody);
-		currentPhysicsManager_.AddBox(entity);
-		currentPhysicsManager_.SetBox(entity, bulletBox);
-
-		currentTransformManager_.AddComponent(entity);
-		currentTransformManager_.SetPosition(entity, position);
-		currentTransformManager_.SetScale(entity, core::Vec2f::one() * bulletScale);
-		currentTransformManager_.SetRotation(entity, core::Degree(0.0f));
 	}
 
 	void RollbackManager::SpawnWall(core::Entity entity, core::Vec2f position)
@@ -533,23 +461,5 @@ namespace game
 		currentWallManager_.SetComponent(entity, wall);
 		lastValidateWallManager_.AddComponent(entity);
 		lastValidateWallManager_.SetComponent(entity, wall);
-	}
-
-	void RollbackManager::DestroyEntity(core::Entity entity)
-	{
-
-#ifdef TRACY_ENABLE
-		ZoneScoped;
-#endif
-		//we don't need to save a bullet that has been created in the time window
-		if (std::find_if(createdEntities_.begin(), createdEntities_.end(), [entity](auto newEntity)
-			{
-				return newEntity.entity == entity;
-			}) != createdEntities_.end())
-		{
-			entityManager_.DestroyEntity(entity);
-			return;
-		}
-			entityManager_.AddComponent(entity, static_cast<core::EntityMask>(ComponentType::DESTROYED));
 	}
 }
