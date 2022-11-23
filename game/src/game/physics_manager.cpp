@@ -57,6 +57,9 @@ namespace game
 				RigidBody& body1 = bodyManager_.GetComponent(entity);
 				Box& box1 = boxManager_.GetComponent(entity);
 
+				if (box1.disableCollisions)
+					continue;
+
 				RigidBody& body2 = bodyManager_.GetComponent(otherEntity);
 				Box& box2 = boxManager_.GetComponent(otherEntity);
 
@@ -71,19 +74,19 @@ namespace game
 					box2.extends.y * 2.0f))
 				{
 
-					onTriggerAction_.Execute(entity, otherEntity);
 
-					// If layer is same and box does not want to collide with same, don't resolve collisions
-					if ((box1.layer == box2.layer) && (!box1.collideWithSame || !box2.collideWithSame))
+
+					if (box1.isTrigger && box2.isTrigger)
 					{
-
+						onTriggerAction_.Execute(entity, otherEntity);
 					}
-					else
-					{
-						CollisionResponse(body1, box1, body2, box2);
-						box1.hasCollided = true;
 
-					}
+
+
+					CollisionResponse(body1, box1, body2, box2);
+					box1.hasCollided = true;
+
+
 				}
 
 			}
@@ -128,18 +131,18 @@ namespace game
 			{
 				otherBody.position.x += mtvX;
 			}
-			if(box.collisionType == CollisionType::STATIC && otherBox.collisionType == CollisionType::NONE)
+			if (box.collisionType == CollisionType::STATIC && otherBox.collisionType == CollisionType::NONE)
 			{
 				otherBody.position.x += mtvX;
 			}
 		}
 		else
 		{
-			
+
 			if (box1IsDynamic && otherBox.collisionType == CollisionType::STATIC)
 			{
 				body.position.y -= mtvY;
-				if(body.velocity.y < 0.0f)
+				if (body.velocity.y < 0.0f)
 				{
 					body.velocity.y = 0.0f;
 				}
@@ -153,7 +156,7 @@ namespace game
 					otherBody.velocity.y = 0.0f;
 				}
 			}
-			if(box.collisionType == CollisionType::STATIC && otherBox.collisionType == CollisionType::STATIC)
+			if (box.collisionType == CollisionType::STATIC && otherBox.collisionType == CollisionType::STATIC)
 			{
 				otherBody.position.y += mtvY;
 				if (otherBody.velocity.y < 0.0f)

@@ -27,8 +27,7 @@ namespace game
 	{
 		NONE = 0,
 		DYNAMIC = 1,
-		STATIC = 2,
-		ARENA = 3
+		STATIC = 2
 	};
 
 	/**
@@ -53,6 +52,7 @@ namespace game
 		bool collideWithSame = false;
 		CollisionType collisionType = CollisionType::NONE;
 		bool hasCollided = false;
+		bool disableCollisions = false;
 	};
 
 	/**

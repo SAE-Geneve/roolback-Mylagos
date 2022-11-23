@@ -307,8 +307,8 @@ namespace game
 		box.layer = CollisionLayer::WALL;
 		box.collideWithSame = true;
 		box.collisionType = CollisionType::STATIC;
-	
-		
+		box.isTrigger = false;
+
 
 		currentPhysicsManager_.AddBody(entity);
 		currentPhysicsManager_.SetBody(entity, body);
@@ -319,7 +319,7 @@ namespace game
 		lastValidatePhysicsManager_.SetBody(entity, body);
 		lastValidatePhysicsManager_.AddBox(entity);
 		lastValidatePhysicsManager_.SetBox(entity, box);
-		
+
 
 		currentTransformManager_.AddComponent(entity);
 		currentTransformManager_.SetPosition(entity, pos);
@@ -346,7 +346,7 @@ namespace game
 		spawnerBody.position = core::Vec2f(0, game::spawnerHeight);
 		Box spawnerBox;
 		spawnerBox.extends = core::Vec2f::one() * game::wallSize;
-		spawnerBox.layer = CollisionLayer::NONE; 
+		spawnerBox.layer = CollisionLayer::NONE;
 
 		spawnerBox.collisionType = CollisionType::NONE;
 
@@ -375,7 +375,7 @@ namespace game
 		playerBox.layer = CollisionLayer::PLAYER;
 		playerBox.collideWithSame = true;
 		playerBox.collisionType = CollisionType::DYNAMIC;
-		
+		playerBox.isTrigger = true;
 
 		PlayerCharacter playerCharacter;
 		playerCharacter.playerNumber = playerNumber;
@@ -412,6 +412,35 @@ namespace game
 
 	void RollbackManager::OnTrigger(core::Entity entity1, core::Entity entity2)
 	{
+		const std::function<void(PlayerCharacter&, core::Entity, const Wall&, core::Entity)> KillFunction =
+			[this](auto& player, auto playerEntity, const auto& wall, auto wallEntity)
+		{
+			const auto& playerBody = currentPhysicsManager_.GetBody(playerEntity);
+			const auto& wallBody = currentPhysicsManager_.GetBody(wallEntity);
+			if (wall.isOnGround) return;
+			if ((player.isOnGround && (playerBody.velocity.y > -0.201f && playerBody.velocity.y < 0.1f))) return;
+			if (std::abs(playerBody.position.x - wallBody.position.x) > game::wallSize / 3.0f) return;
+			if (std::abs(playerBody.position.x - wallBody.position.x) > std::abs(playerBody.position.y - wallBody.position.y)) return;
+			if (playerBody.position.y > wallBody.position.y) return;
+			--player.health;
+		};
+
+
+		if (entityManager_.HasComponent(entity1, static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)) &&
+			entityManager_.HasComponent(entity2, static_cast<core::EntityMask>(ComponentType::WALL)))
+		{
+			auto& player = currentPlayerManager_.GetComponent(entity1);
+			const auto& wall = currentWallManager_.GetComponent(entity2);
+			KillFunction(player, entity1, wall, entity2);
+		}
+		if (entityManager_.HasComponent(entity2, static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)) &&
+			entityManager_.HasComponent(entity1, static_cast<core::EntityMask>(ComponentType::WALL)))
+		{
+			auto& player = currentPlayerManager_.GetComponent(entity2);
+			const auto& wall = currentWallManager_.GetComponent(entity1);
+			KillFunction(player, entity2, wall, entity1);
+		}
+
 
 		const std::function<void(const PlayerCharacter&, core::Entity, const Bullet&, core::Entity)> ManageCollision =
 			[this](const auto& player, auto playerEntity, const auto& bullet, auto bulletEntity)
@@ -486,6 +515,7 @@ namespace game
 		wall.wallType = WallType::WallSimple;
 		wallBox.collisionType = CollisionType::STATIC;
 		wallBox.collideWithSame = true;
+		wallBox.isTrigger = true;
 
 		currentWallManager_.AddComponent(entity);
 		currentWallManager_.SetComponent(entity, wall);
@@ -523,5 +553,5 @@ namespace game
 			return;
 		}
 			entityManager_.AddComponent(entity, static_cast<core::EntityMask>(ComponentType::DESTROYED));
-}
+	}
 }

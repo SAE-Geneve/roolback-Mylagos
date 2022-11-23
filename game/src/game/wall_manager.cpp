@@ -40,12 +40,11 @@ namespace game
 					continue;
 				}
 
-
-					if (wallBody.velocity.y == 0.0f && (!(wall.wallType == WallType::WallStatic) || !(wall.wallType == WallType::WallArena)))
+					/*if (wallBody.velocity.y == 0.0f && (!(wall.wallType == WallType::WallStatic) || !(wall.wallType == WallType::WallArena)))
 					{
-						wall.isOnGround = wall.hasCollided;
-						wall.hasCollided = true;
-					}
+						wall.hasCollided = wall.isOnGround;
+						wall.isOnGround = true;
+					}*/
 					wallBody.velocity += core::Vec2f(0.0f, game::gravity * (static_cast<float>(wall.wallType) / 100.0f)/* * wallSpeedRatio(wallBody.position.y)*/) * dt.asSeconds();
 
 

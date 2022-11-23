@@ -31,6 +31,14 @@ namespace game
 			auto playerBody = physicsManager_.GetBody(playerEntity);
 			auto playerBox = physicsManager_.GetBox(playerEntity);
 			auto playerCharacter = GetComponent(playerEntity);
+
+			if(playerCharacter.health == 0)
+			{
+				playerBox.disableCollisions = true;
+				playerBody.velocity = core::Vec2f{};
+				playerBody.velocity += core::Vec2f(-10.0f, -50.0f) * dt.asSeconds();
+			}
+
 			const auto input = playerCharacter.input;
 
 			const bool right = input & PlayerInputEnum::PlayerInput::RIGHT;
@@ -42,9 +50,10 @@ namespace game
 
 
 
-			if (up && playerCharacter.isOnGround)
+			if (up && playerCharacter.jumpBuffer<20)
 			{
 				playerCharacter.jumpBuffer++;
+				playerCharacter.isOnGround = false;
 				if (playerCharacter.jumpBuffer == 1)
 				{
 					core::LogDebug("eee");
@@ -58,15 +67,14 @@ namespace game
 			}
 			else if (!up || playerCharacter.jumpBuffer > 20)
 			{
-				playerCharacter.isOnGround = false;
 				playerCharacter.jumpCooldownCount = 0;
-				playerCharacter.jumpBuffer = 0;
 			}
 			if (playerBody.velocity.y < 0.01f && playerBody.velocity.y > -0.01f)
 			{
 				playerCharacter.jumpCooldownCount += 1;
 				if (playerCharacter.jumpCooldownCount > 2)
 				{
+					playerCharacter.jumpBuffer = 0;
 					playerCharacter.isOnGround = true;
 				}
 			}
@@ -81,8 +89,6 @@ namespace game
 					playerBody.velocity.y += game::gravity * 2 * dt.asSeconds();
 				}
 			}
-
-
 
 
 			playerCharacter.summForceX = 0.0f;

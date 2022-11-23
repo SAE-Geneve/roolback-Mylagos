@@ -35,7 +35,7 @@ namespace game
 	 * \brief mmaxPlayerNmb is a integer constant that defines the maximum number of player per game
 	 */
 	constexpr std::uint32_t maxPlayerNmb = 2;
-	constexpr short playerHealth = 5;
+	constexpr short playerHealth = 1;
 	constexpr float playerSpeed = 1.0f;
 	constexpr core::Degree playerAngularSpeed = core::Degree(90.0f);
 	constexpr float playerShootingPeriod = 0.3f;
