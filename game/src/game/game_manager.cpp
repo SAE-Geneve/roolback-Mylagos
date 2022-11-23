@@ -25,7 +25,7 @@ GameManager::GameManager() :
 {
     playerEntityMap_.fill(core::INVALID_ENTITY);
 
-    // 1 for floor 2/3 for walls, 4 for mtv test
+    // 1 for floor 2/3 for walls
     for (int i = 0; i<3; i++)
     {
 	    const auto entity = entityManager_.CreateEntity();
@@ -92,7 +92,7 @@ core::Entity GameManager::SpawnWall(PlayerNumber, core::Vec2f position)
 
     transformManager_.AddComponent(entity);
     transformManager_.SetPosition(entity, position);
-    transformManager_.SetScale(entity, core::Vec2f(20, 20));
+    transformManager_.SetScale(entity, core::Vec2f(1.5, 1.5));
     transformManager_.SetRotation(entity, core::Degree(0.0f));
     rollbackManager_.SpawnWall(entity, position);
     return entity;
@@ -147,10 +147,6 @@ void ClientGameManager::Begin()
     if (!wallSpawnerTexture_.loadFromFile("data/sprites/wallSpawner.png"))
     {
         core::LogError("Could not load wallspawner sprite");
-    }
-    if (!wallSpawnerTexture_.loadFromFile("data/sprites/background.png"))
-    {
-        core::LogError("Could not load background sprite");
     }
     //load fonts
     if (!font_.loadFromFile("data/fonts/8-bit-hud.ttf"))
@@ -340,11 +336,7 @@ void ClientGameManager::SpawnPlayer(PlayerNumber playerNumber, core::Vec2f posit
     spriteManager_.SetOrigin(entity, sf::Vector2f(shipTexture_.getSize()) / 2.0f);
     spriteManager_.SetColor(entity, playerColors[playerNumber]);
 
-    const auto otherEntity = pair.second;
-    spriteManager_.AddComponent(otherEntity);
-    spriteManager_.SetTexture(otherEntity, wallSpawnerTexture_);
-    spriteManager_.SetOrigin(otherEntity, sf::Vector2f(wallSpawnerTexture_.getSize()) / 2.0f);
-    spriteManager_.SetColor(otherEntity, playerColors[playerNumber]);
+    
 }
 
 core::Entity game::ClientGameManager::SpawnWall(PlayerNumber playerNumber, core::Vec2f position)
@@ -352,11 +344,6 @@ core::Entity game::ClientGameManager::SpawnWall(PlayerNumber playerNumber, core:
     core::LogDebug(fmt::format("Spawn wall from player: {}", playerNumber));
     
     const auto entity = GameManager::SpawnWall(playerNumber, position);
-
-    spriteManager_.AddComponent(entity);
-    spriteManager_.SetTexture(entity, wallTexture_);
-    spriteManager_.SetOrigin(entity, sf::Vector2f(shipTexture_.getSize()) / 2.0f);
-    spriteManager_.SetColor(entity, playerColors[playerNumber]);
     
 	return entity;
 }
@@ -492,41 +479,7 @@ void ClientGameManager::UpdateCameraView()
     }
 
     cameraView_ = originalView_;
-    const sf::Vector2f extends{ cameraView_.getSize() / 2.0f / core::pixelPerMeter };
     float currentZoom = 1.0f;
-    constexpr float margin = 1.0f;
-    //currentZoom = (cameraView_.getSize().x + cameraView_.getSize().y) / (originalView_.getSize().x + originalView_.getSize().y);
-
-    //std::cout << currentZoom;
-
-    /*for (PlayerNumber playerNumber = 0; playerNumber < maxPlayerNmb; playerNumber++)
-    {
-        const auto playerEntity = GetEntityFromPlayerNumber(playerNumber);
-        if (playerEntity == core::INVALID_ENTITY)
-        {
-            continue;
-        }
-        if (entityManager_.HasComponent(playerEntity, static_cast<core::EntityMask>(core::ComponentType::POSITION)))
-        {
-            const auto position = transformManager_.GetPosition(playerEntity);
-            if (core::Abs(position.x) + margin > extends.x)
-            {
-                const auto ratio = (std::abs(position.x) + margin) / extends.x;
-                if (ratio > currentZoom)
-                {
-                    currentZoom = ratio;
-                }
-            }
-            if (core::Abs(position.y) + margin > extends.y)
-            {
-                const auto ratio = (std::abs(position.y) + margin) / extends.y;
-                if (ratio > currentZoom)
-                {
-                    currentZoom = ratio;
-                }
-            }
-        }
-    }*/
     cameraView_.zoom(currentZoom);
 
 }

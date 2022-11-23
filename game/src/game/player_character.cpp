@@ -57,7 +57,6 @@ namespace game
 				playerCharacter.isOnGround = false;
 				if (playerCharacter.jumpBuffer == 1)
 				{
-					core::LogDebug("eee");
 					playerBody.velocity.y += 120.0f * dt.asSeconds();
 				}
 				else if (playerCharacter.jumpBuffer > 0 && playerCharacter.jumpBuffer < 10)

@@ -140,7 +140,6 @@ namespace game
 			}
 		}
 		currentFrame_ = newFrame;
-		//std::cout << "ooooo\n\n\n";
 	}
 
 	void RollbackManager::ValidateFrame(Frame newValidateFrame)
@@ -431,13 +430,12 @@ namespace game
 	void RollbackManager::SpawnWall(core::Entity entity, core::Vec2f position)
 	{
 		createdEntities_.push_back({ entity, testedFrame_ });
-
 		Wall wall;
 
 		RigidBody wallBody;
 		wallBody.position = position;
 		Box wallBox;
-		//TODO add wall length when on it
+
 		wallBox.extends = core::Vec2f::one() * game::wallSize;
 
 		wall.wallType = WallType::WallSimple;
@@ -448,14 +446,16 @@ namespace game
 		currentWallManager_.AddComponent(entity);
 		currentWallManager_.SetComponent(entity, wall);
 
+		currentTransformManager_.AddComponent(entity);
+		currentTransformManager_.SetPosition(entity, position);
+		currentTransformManager_.SetScale(entity, core::Vec2f::one()*1.0f);
+
 		currentPhysicsManager_.AddBody(entity);
 		currentPhysicsManager_.SetBody(entity, wallBody);
 		currentPhysicsManager_.AddBox(entity);
 		currentPhysicsManager_.SetBox(entity, wallBox);
+		
 
-		currentTransformManager_.AddComponent(entity);
-		currentTransformManager_.SetPosition(entity, position);
-		currentTransformManager_.SetScale(entity, core::Vec2f::one()*1.5f);
 
 		currentWallManager_.AddComponent(entity);
 		currentWallManager_.SetComponent(entity, wall);
