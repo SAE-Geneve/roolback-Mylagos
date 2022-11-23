@@ -12,7 +12,7 @@ namespace game
 	{}
 
 
-	void WallSpawnerManager::FixedUpdate(const sf::Time)
+	void WallSpawnerManager::FixedUpdate(const sf::Time dt)
 	{
 		for (core::Entity entity = 0; entity < entityManager_.GetEntitiesSize(); entity++)
 		{
@@ -31,39 +31,37 @@ namespace game
 			const bool seven = inputs & PlayerInputEnum::PlayerInput::BM_LEFT;
 			const bool nine = inputs & PlayerInputEnum::PlayerInput::BM_RIGHT;
 			
-			if (wallSpawner.movementFrames == 0)
+			if (wallSpawner.movementTimeLocker == 0.0f && (seven || nine))
 			{
-				if(seven || nine)
-				{
 					wallBody.position.x += ((seven ? -1.0f : 0.0f) + (nine ? 1.0f : 0.0f)) * 0.5f;
-					wallSpawner.movementFrames++;
-				}
+					wallSpawner.movementTimeLocker+=dt.asSeconds();
 			}
 
-
-
-			if(wallSpawner.movementFrames!=0)
+			if(wallSpawner.movementTimeLocker!=0.0f)
 			{
-				wallSpawner.movementFrames++;
-				if(wallSpawner.movementFrames == 7)
+				wallSpawner.movementTimeLocker += dt.asSeconds();
+				if(wallSpawner.movementTimeLocker >= 0.25f)
 				{
-					wallSpawner.movementFrames = 0;
+					wallSpawner.movementTimeLocker = 0.0f;
 				}
 			}
 			
 
-			if (!down && !player.isbuilding)
+			if(wallSpawner.buildTimeLocker == 0.0f && down)
 			{
-					player.isbuilding = true;
+				gameManager_.SpawnWall(player.playerNumber, wallBody.position);
+				wallSpawner.buildTimeLocker += dt.asSeconds();
 			}
-			if (down && player.isbuilding)
+
+			if (wallSpawner.buildTimeLocker != 0.0f)
 			{
-				if (player.isbuilding)
+				wallSpawner.buildTimeLocker += dt.asSeconds();
+				if (wallSpawner.buildTimeLocker >= 1.0f)
 				{
-					gameManager_.SpawnWall(player.playerNumber, wallBody.position);
-					player.isbuilding = false;
+					wallSpawner.buildTimeLocker = 0.0f;
 				}
 			}
+
 		}
 	}
 }

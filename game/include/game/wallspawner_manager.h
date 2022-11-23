@@ -15,7 +15,8 @@ namespace game
 	struct WallSpawner
 	{
 		core::Entity playerEntity = core::INVALID_ENTITY;
-		int movementFrames = 0;
+		float movementTimeLocker = 0.0f;
+		float buildTimeLocker = 0.0f;
 		float horizontalVelocity = 0;
 		PlayerNumber playerNumber = INVALID_PLAYER;
 		core::Vec2f initialPosition{};
